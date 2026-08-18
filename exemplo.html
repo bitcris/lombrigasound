@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Exemplo Base</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; overflow: hidden; font-family: system-ui, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    // ⚡ Resolução leve e responsiva (DPR = 1 para menor consumo de GPU)
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 🎯 VARIÁVEIS DE ESTADO (com valores padrão):
+    let isPlaying = true;
+    let genre = 'synthwave';
+
+    // 🎨 PALETAS DE CORES E ESTILOS POR GÊNERO:
+    const GENRE_THEMES = {
+      synthwave: { primary: '#ff007f', secondary: '#00f0ff', speed: 0.06 },
+      rock:      { primary: '#ff2a00', secondary: '#ff9900', speed: 0.09 },
+      country:   { primary: '#d97706', secondary: '#fbbf24', speed: 0.04 },
+      flashback: { primary: '#9333ea', secondary: '#06b6d4', speed: 0.05 },
+      lofi:      { primary: '#a78bfa', secondary: '#f472b6', speed: 0.03 },
+      jazz:      { primary: '#3b82f6', secondary: '#f59e0b', speed: 0.035 }
+    };
+
+    // 📡 ESCUTA AUTOMÁTICA DE MENSAGENS (postMessage):
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+
+      // 1. Play / Pause
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+
+      // 2. Gênero Musical
+      const rawGenre = e.data.genre || e.data.genere;
+      if (rawGenre && typeof rawGenre === 'string') {
+        genre = rawGenre.toLowerCase().trim();
+      }
+    });
+
+    // 🎨 LOOP DE ANIMAÇÃO:
+    let t = 0;
+
+    function render() {
+      const theme = GENRE_THEMES[genre] || { primary: '#ff6b00', secondary: '#ffa500', speed: 0.05 };
+
+      // Limpeza do canvas
+      ctx.fillStyle = '#050608';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+
+      // Só anima se estiver tocando
+      if (isPlaying) {
+        t += theme.speed;
+      }
+
+      // Gráficos do visualizer
+      const pulse = Math.sin(t) * 20;
+      const radius = 50 + pulse;
+
+      // Desenho do elemento
+      ctx.fillStyle = theme.primary;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, Math.max(5, radius), 0, Math.PI * 2);
+      ctx.fill();
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>
