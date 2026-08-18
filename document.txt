@@ -7,6 +7,7 @@
 O Lombrigasound é uma biblioteca estática de visualizadores de áudio leves e
 reativos para Web Players, Rádios Online e Streams.
 
+• Ambiente Linux: /home/station/orange-station/lombrigasound
 • Hospedagem: Cloudflare Pages / Workers
 • URL Base de Produção: https://lombrigasound.dnsx.workers.dev/
 • Modo de Uso: Embutido via <iframe> em players externos.
@@ -15,7 +16,8 @@ reativos para Web Players, Rádios Online e Streams.
 2. ARQUITETURA SINGLE-FILE (ARQUIVO ÚNICO POR VISUALIZER)
 --------------------------------------------------------------------------------
 Cada visualizer deve ser implementado em um único arquivo HTML autocontido na
-raiz do projeto (HTML, CSS e JavaScript inline no mesmo arquivo).
+pasta do projeto (`/home/station/orange-station/lombrigasound`), com HTML, CSS e
+JavaScript inline no mesmo arquivo.
 
 • Nomenclatura das Rotas:
   - O arquivo `rock1.html` torna-se a rota `/rock1`
@@ -64,20 +66,26 @@ window.addEventListener('message', (e) => {
 
 4. ARQUIVO DE REFERÊNCIA (TEMPLATE BASE)
 --------------------------------------------------------------------------------
-O arquivo `./exemplo.html` na raiz do projeto serve como template padrão.
+O arquivo de referência é:
+`/home/station/orange-station/lombrigasound/exemplo.html`
+
 Para criar um novo visualizer:
-  1. Duplique `./exemplo.html` com o novo nome (ex: `rock2.html`).
+  1. Duplique `exemplo.html` com o novo nome (ex: `rock2.html`).
   2. Altere o algoritmo de desenho dentro da função `render()`.
-  3. Adicione a nova rota na lista de rotas do `./index.html`.
+  3. Adicione a nova rota na lista de rotas do `index.html`.
 
 
 5. GITHUB & DEPLOY
 --------------------------------------------------------------------------------
+• Diretório de Trabalho:
+  cd /home/station/orange-station/lombrigasound
+
 • Repositório Remoto:
   git@github.com:bitcris/lombrigasound.git
 
 • Chave SSH:
-  O ambiente possui uma chave SSH configurada para acesso ao GitHub.
+  O ambiente Linux possui uma chave SSH exclusiva para deploy, sem passphrase,
+  configurada para acesso ao GitHub.
   Não é necessário solicitar ou inserir passphrase durante o deploy.
   Não modificar nem substituir as chaves SSH do sistema.
 
