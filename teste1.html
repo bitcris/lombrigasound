@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Teste 1</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #08090d; overflow: hidden; font-family: system-ui, -apple-system, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    // ⚡ Resolução leve e responsiva (DPR = 1 para menor consumo de GPU)
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 🎯 VARIÁVEIS PRINCIPAIS (com valores padrão):
+    let isPlaying = true;
+    let genre = 'synthwave'; // Padrão: synthwave, rock, country, lofi, flashback, jazz, etc.
+
+    // 🎨 PALETAS DE CORES E ESTILOS POR GÊNERO:
+    const GENRE_THEMES = {
+      synthwave: { primary: '#ff007f', secondary: '#00f0ff', speed: 0.06 },
+      rock:      { primary: '#ff2a00', secondary: '#ff9900', speed: 0.09 },
+      country:   { primary: '#d97706', secondary: '#fbbf24', speed: 0.04 },
+      flashback: { primary: '#9333ea', secondary: '#06b6d4', speed: 0.05 },
+      lofi:      { primary: '#a78bfa', secondary: '#f472b6', speed: 0.03 },
+      jazz:      { primary: '#3b82f6', secondary: '#f59e0b', speed: 0.035 }
+    };
+
+    // 📡 ESCUTA DE MENSAGENS (isPlaying e genre/genere):
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+
+      // 1. Status de Reprodução (Play/Pause)
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+
+      // 2. Gênero Musical
+      const rawGenre = e.data.genre || e.data.genere;
+      if (rawGenre && typeof rawGenre === 'string') {
+        genre = rawGenre.toLowerCase().trim();
+      }
+    });
+
+    // 🎨 LOOP DE ANIMAÇÃO:
+    let t = 0;
+
+    function render() {
+      const theme = GENRE_THEMES[genre] || { primary: '#ff6b00', secondary: '#ffa500', speed: 0.05 };
+
+      // Limpeza suave de tela
+      ctx.fillStyle = '#08090d';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+
+      // Só avança a animação no ritmo do gênero se estiver tocando
+      if (isPlaying) {
+        t += theme.speed;
+      }
+
+      // Círculo central com brilho reativo ao gênero
+      const pulse = Math.sin(t) * 25;
+      const radius = 55 + pulse;
+
+      // Anel externo com cor secundária
+      ctx.strokeStyle = theme.secondary;
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius + 15, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Círculo interno preenchido com cor primária
+      ctx.fillStyle = theme.primary;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, Math.max(10, radius), 0, Math.PI * 2);
+      ctx.fill();
+
+      // Indicador textual discreto do gênero atual
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.font = '12px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(genre.toUpperCase() + (isPlaying ? '' : ' (PAUSADO)'), centerX, centerY + radius + 40);
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>
