@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Audio Visualizers Library</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0d0e15;
+      color: #f1f5f9;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    h1 {
+      font-size: 2.2rem;
+      background: linear-gradient(135deg, #ff007f, #ff6b00, #00f0ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    p {
+      color: #94a3b8;
+      font-size: 1rem;
+      max-width: 600px;
+    }
+    .preview-container {
+      width: 100%;
+      max-width: 800px;
+      background: #161822;
+      border: 1px solid #272a38;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .iframe-wrapper {
+      width: 100%;
+      height: 350px;
+      position: relative;
+    }
+    iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+    .controls {
+      padding: 1.25rem;
+      background: #11131c;
+      border-top: 1px solid #272a38;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    button {
+      background: #1e2230;
+      color: #f8fafc;
+      border: 1px solid #33384a;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+    }
+    button:hover {
+      background: #282d40;
+      border-color: #4b5563;
+    }
+    button.active {
+      background: #ff6b00;
+      border-color: #ff6b00;
+      color: #fff;
+    }
+    .status-badge {
+      font-size: 0.85rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+    .status-badge.paused {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+    .routes-list {
+      margin-top: 2rem;
+      width: 100%;
+      max-width: 800px;
+    }
+    .routes-list h2 {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: #e2e8f0;
+    }
+    .route-card {
+      background: #161822;
+      border: 1px solid #272a38;
+      padding: 1rem;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .route-card a {
+      color: #38bdf8;
+      text-decoration: none;
+      font-family: monospace;
+      font-size: 1rem;
+    }
+    .route-card a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Lombrigasound Visualizers</h1>
+    <p>Biblioteca de visualizadores de áudio leves e reativos para Web Players, Rádios e Streaming via iframe.</p>
+  </header>
+
+  <div class="preview-container">
+    <div class="iframe-wrapper">
+      <iframe id="preview-frame" src="/teste1"></iframe>
+    </div>
+    <div class="controls">
+      <div class="btn-group">
+        <button id="btn-toggle-play" class="active">⏸️ Pausar</button>
+      </div>
+      <div class="btn-group">
+        <button class="btn-genre active" data-genre="synthwave">Synthwave</button>
+        <button class="btn-genre" data-genre="rock">Rock</button>
+        <button class="btn-genre" data-genre="country">Country</button>
+        <button class="btn-genre" data-genre="flashback">Flashback</button>
+        <button class="btn-genre" data-genre="lofi">Lofi</button>
+        <button class="btn-genre" data-genre="jazz">Jazz</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="routes-list">
+    <h2>Rotas Disponíveis</h2>
+    <div class="route-card">
+      <div>
+        <strong>Teste 1 (Reativo)</strong>
+        <p style="font-size: 0.85rem; color: #64748b;">Visualizer de círculo pulsante com suporte a isPlaying e genre.</p>
+      </div>
+      <a href="/teste1" target="_blank">/teste1 ↗</a>
+    </div>
+  </div>
+
+  <script>
+    const iframe = document.getElementById('preview-frame');
+    const btnTogglePlay = document.getElementById('btn-toggle-play');
+    const genreButtons = document.querySelectorAll('.btn-genre');
+
+    let isPlaying = true;
+    let currentGenre = 'synthwave';
+
+    function sendState() {
+      if (iframe.contentWindow) {
+        iframe.contentWindow.postMessage({
+          isPlaying: isPlaying,
+          genre: currentGenre
+        }, '*');
+      }
+    }
+
+    btnTogglePlay.addEventListener('click', () => {
+      isPlaying = !isPlaying;
+      btnTogglePlay.textContent = isPlaying ? '⏸️ Pausar' : '▶️ Tocar';
+      btnTogglePlay.classList.toggle('active', isPlaying);
+      sendState();
+    });
+
+    genreButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        genreButtons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentGenre = btn.getAttribute('data-genre');
+        sendState();
+      });
+    });
+
+    // Envia estado inicial ao carregar
+    iframe.addEventListener('load', () => {
+      setTimeout(sendState, 100);
+    });
+  </script>
+</body>
+</html>
