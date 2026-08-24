@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; }
+    html, body, iframe { width: 100%; height: 100%; border: none; overflow: hidden; background: #000; }
+  </style>
+</head>
+<body>
+  <iframe id="vis-frame" src=""></iframe>
+  <script>
+    const variations = ['/gospel/1.html', '/gospel/2.html'];
+    const chosen = variations[Math.floor(Math.random() * variations.length)];
+    const iframe = document.getElementById('vis-frame');
+    iframe.src = chosen;
+    window.addEventListener('message', (e) => {
+      if (iframe.contentWindow) iframe.contentWindow.postMessage(e.data, '*');
+    });
+  </script>
+</body>
+</html>
