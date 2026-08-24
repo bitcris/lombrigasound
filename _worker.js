@@ -1,6 +1,6 @@
 export default {
   async fetch(request, env, ctx) {
-    // Tratamento de requisições OPTIONS (CORS preflight)
+    // 1. Tratamento de CORS Preflight
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         headers: {
@@ -23,13 +23,14 @@ export default {
       '/synthwave': ['/synthwave/1.html', '/synthwave/2.html']
     };
 
-    // Helper para aplicar cabeçalhos liberando o uso em <iframe>
+    // Helper para injetar cabeçalhos liberando <iframe>
     const withIframeHeaders = (response) => {
+      if (!response) return new Response('Not Found', { status: 404 });
       const headers = new Headers(response.headers);
       headers.set('Access-Control-Allow-Origin', '*');
       headers.set('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
       headers.set('Content-Security-Policy', 'frame-ancestors *');
-      headers.delete('X-Frame-Options'); // ⚠️ Remove o bloqueio de SAMEORIGIN para permitir iframes externos
+      headers.delete('X-Frame-Options');
 
       return new Response(response.body, {
         status: response.status,
@@ -38,32 +39,35 @@ export default {
       });
     };
 
-    const fetchStatic = async (path) => {
-      const targetUrl = new URL(path, url.origin);
-      if (env.ASSETS) {
-        const res = await env.ASSETS.fetch(new Request(targetUrl, request));
+    // 2. Se o binding de assets estiver ativo (Cloudflare Pages / Workers)
+    if (env && env.ASSETS) {
+      // Se for uma rota de gênero mapeada, sorteia a variação
+      if (GENRE_POOLS[cleanPath]) {
+        const pool = GENRE_POOLS[cleanPath];
+        const chosen = pool[Math.floor(Math.random() * pool.length)];
+        const res = await env.ASSETS.fetch(new Request(new URL(chosen, url.origin)));
         return withIframeHeaders(res);
       }
-      const res = await fetch(targetUrl);
-      return withIframeHeaders(res);
-    };
 
-    // 1. Sorteio de gênero
-    if (GENRE_POOLS[cleanPath]) {
-      const pool = GENRE_POOLS[cleanPath];
-      const chosen = pool[Math.floor(Math.random() * pool.length)];
-      return fetchStatic(chosen);
-    }
-
-    // 2. Busca estática normal
-    if (env.ASSETS) {
+      // Tenta servir o arquivo estático requisitado
       const res = await env.ASSETS.fetch(request);
-      if (res.status !== 404) return withIframeHeaders(res);
-      // 3. Fallback universal (200 OK)
-      return fetchStatic('/default/1.html');
+      if (res.status !== 404) {
+        return withIframeHeaders(res);
+      }
+
+      // 3. Fallback Universal (status 200 para qualquer rota inexistente)
+      const fallbackRes = await env.ASSETS.fetch(new Request(new URL('/default/1.html', url.origin)));
+      return withIframeHeaders(fallbackRes);
     }
 
-    const res = await fetch(request);
-    return withIframeHeaders(res);
+    // Proteção contra loop recursivo (Error 1042)
+    return new Response('Lombrigasound: Para rodar com arquivos estáticos, faça o deploy via Cloudflare Pages: npx wrangler pages deploy .', {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Access-Control-Allow-Origin': '*',
+        'Content-Security-Policy': 'frame-ancestors *'
+      }
+    });
   }
 };
