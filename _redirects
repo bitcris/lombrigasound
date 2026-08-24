@@ -1,4 +1,1 @@
-# Cloudflare Pages Redirects / Rewrites
-# Se o arquivo estático existir, entrega diretamente.
-# Se a rota não existir, entrega o default/1.html com status 200 (fallback)
-/*    /default/1.html   200
+# Regras estáticas gerenciadas pelo _worker.js

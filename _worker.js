@@ -1,6 +1,6 @@
 export default {
   async fetch(request, env, ctx) {
-    // 1. Tratamento de CORS Preflight (OPTIONS)
+    // 1. Preflight CORS
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         headers: {
@@ -24,7 +24,6 @@ export default {
       '/default': ['/default/1.html']
     };
 
-    // Helper para injetar cabeçalhos liberando <iframe> em qualquer domínio
     const withIframeHeaders = (response) => {
       if (!response) return new Response('Not Found', { status: 404 });
       const headers = new Headers(response.headers);
@@ -34,42 +33,45 @@ export default {
       headers.delete('X-Frame-Options');
 
       return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
+        status: 200,
+        statusText: 'OK',
         headers
       });
     };
 
-    // Execução via Cloudflare Pages
     if (env && env.ASSETS) {
-      // Caso 1: Hub Central de Preview (raiz)
-      if (cleanPath === '/' || cleanPath === '/index.html') {
-        const res = await env.ASSETS.fetch(new Request(new URL('/index.html', url.origin)));
-        return withIframeHeaders(res);
-      }
-
-      // Caso 2: Rota de Gênero Mapeada -> Sorteia uma variação
-      if (GENRE_POOLS[cleanPath]) {
-        const pool = GENRE_POOLS[cleanPath];
-        const chosen = pool[Math.floor(Math.random() * pool.length)];
-        const res = await env.ASSETS.fetch(new Request(new URL(chosen, url.origin)));
-        return withIframeHeaders(res);
-      }
-
-      // Caso 3: Arquivos diretos com extensão (ex: /rock/1.html, /exemplo.html, /favicon.ico)
-      if (cleanPath.includes('.')) {
-        const res = await env.ASSETS.fetch(request);
-        if (res.status === 200) {
+      try {
+        // Caso 1: Hub Central de Preview (raiz)
+        if (cleanPath === '/' || cleanPath === '/index.html') {
+          const res = await env.ASSETS.fetch(new Request(new URL('/index.html', url.origin)));
           return withIframeHeaders(res);
         }
-      }
 
-      // Caso 4: Fallback Universal -> Qualquer rota inexistente responde com o visualizador default
-      const fallbackRes = await env.ASSETS.fetch(new Request(new URL('/default/1.html', url.origin)));
-      return withIframeHeaders(fallbackRes);
+        // Caso 2: Rota de Gênero Mapeada -> Sorteia uma variação
+        if (GENRE_POOLS[cleanPath]) {
+          const pool = GENRE_POOLS[cleanPath];
+          const chosen = pool[Math.floor(Math.random() * pool.length)];
+          const res = await env.ASSETS.fetch(new Request(new URL(chosen, url.origin)));
+          return withIframeHeaders(res);
+        }
+
+        // Caso 3: Arquivo estático com extensão (ex: /rock/1.html, /exemplo.html, /favicon.ico)
+        if (cleanPath.includes('.')) {
+          const res = await env.ASSETS.fetch(request);
+          if (res.status === 200) {
+            return withIframeHeaders(res);
+          }
+        }
+
+        // Caso 4: Fallback Universal -> Qualquer rota desconhecida serve /default/1.html
+        const fallbackRes = await env.ASSETS.fetch(new Request(new URL('/default/1.html', url.origin)));
+        return withIframeHeaders(fallbackRes);
+      } catch (err) {
+        return new Response('Fallback Error: ' + err.message, { status: 500 });
+      }
     }
 
-    return new Response('Lombrigasound Pages: env.ASSETS indisponível.', {
+    return new Response('Lombrigasound: env.ASSETS indisponível', {
       status: 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
