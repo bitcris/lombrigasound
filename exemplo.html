@@ -3,21 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lombrigasound - Exemplo Base</title>
+  <title>Lombrigasound - Visualizer Template Base</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #000; overflow: hidden; font-family: system-ui, sans-serif; }
-    canvas { display: block; width: 100vw; height: 100vh; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #05070c;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
   </style>
 </head>
 <body>
   <canvas id="c"></canvas>
 
   <script>
+    /**
+     * Lombrigasound - Template Padrão de Visualizador (Canvas 2D)
+     * 
+     * Diretrizes:
+     * - Autocontido (Single File HTML)
+     * - Comunicação via postMessage (isPlaying, genre)
+     * - Performance 60 FPS com requestAnimationFrame
+     */
+
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
 
-    // ⚡ Resolução leve e responsiva (DPR = 1 para menor consumo de GPU)
+    // ⚡ Redimensionamento Responsivo
     function resize() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -25,27 +46,31 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // 🎯 VARIÁVEIS DE ESTADO (com valores padrão):
+    // 🎯 Variáveis de Estado
     let isPlaying = true;
     let genre = 'synthwave';
 
-    // 🎨 PALETAS DE CORES E ESTILOS POR GÊNERO:
+    // 🎨 Temas e Paletas de Cores por Gênero
     const GENRE_THEMES = {
-      synthwave: { primary: '#ff007f', secondary: '#00f0ff', speed: 0.06 },
-      rock:      { primary: '#ff2a00', secondary: '#ff9900', speed: 0.09 },
-      country:   { primary: '#d97706', secondary: '#fbbf24', speed: 0.04 },
-      flashback: { primary: '#9333ea', secondary: '#06b6d4', speed: 0.05 },
-      lofi:      { primary: '#a78bfa', secondary: '#f472b6', speed: 0.03 },
-      jazz:      { primary: '#3b82f6', secondary: '#f59e0b', speed: 0.035 }
+      synthwave: { primary: '#ff007f', secondary: '#00f0ff', glow: '#ff00aa', speed: 0.05 },
+      rock:      { primary: '#ff2a00', secondary: '#ff9900', glow: '#ff4400', speed: 0.08 },
+      gospel:    { primary: '#fbbf24', secondary: '#ffffff', glow: '#f59e0b', speed: 0.03 },
+      country:   { primary: '#d97706', secondary: '#fbbf24', glow: '#ea580c', speed: 0.04 },
+      lofi:      { primary: '#a78bfa', secondary: '#f472b6', glow: '#c084fc', speed: 0.025 },
+      jazz:      { primary: '#3b82f6', secondary: '#f59e0b', glow: '#60a5fa', speed: 0.035 },
+      edm:       { primary: '#00ff88', secondary: '#00e5ff', glow: '#7000ff', speed: 0.07 }
     };
 
-    // 📡 ESCUTA AUTOMÁTICA DE MENSAGENS (postMessage):
+    // 📡 Listener Obrigatório de postMessage
     window.addEventListener('message', (e) => {
       if (!e.data) return;
 
       // 1. Play / Pause
-      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
-      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+      if (e.data.isPlaying !== undefined) {
+        isPlaying = Boolean(e.data.isPlaying);
+      } else if (e.data.playing !== undefined) {
+        isPlaying = Boolean(e.data.playing);
+      }
 
       // 2. Gênero Musical
       const rawGenre = e.data.genre || e.data.genere;
@@ -54,33 +79,112 @@
       }
     });
 
-    // 🎨 LOOP DE ANIMAÇÃO:
+    // ✨ Sistema de Partículas Ambiente
+    const NUM_PARTICLES = 40;
+    const particles = Array.from({ length: NUM_PARTICLES }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 2 + 1,
+      speedX: (Math.random() - 0.5) * 0.8,
+      speedY: (Math.random() - 0.5) * 0.8,
+      alpha: Math.random() * 0.7 + 0.3
+    }));
+
+    // 🔄 Loop Principal de Animação
     let t = 0;
+    const NUM_POINTS = 64;
 
     function render() {
-      const theme = GENRE_THEMES[genre] || { primary: '#ff6b00', secondary: '#ffa500', speed: 0.05 };
+      const theme = GENRE_THEMES[genre] || { primary: '#06b6d4', secondary: '#ec4899', glow: '#3b82f6', speed: 0.04 };
 
-      // Limpeza do canvas
-      ctx.fillStyle = '#050608';
+      // Efeito de rastro suave (motion blur)
+      ctx.fillStyle = 'rgba(5, 7, 12, 0.2)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      const centerX = canvas.width / 2;
-      const centerY = canvas.height / 2;
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const baseRadius = Math.min(canvas.width, canvas.height) * 0.22;
 
-      // Só anima se estiver tocando
+      // Avança o tempo apenas se estiver tocando
       if (isPlaying) {
         t += theme.speed;
       }
 
-      // Gráficos do visualizer
-      const pulse = Math.sin(t) * 20;
-      const radius = 50 + pulse;
+      // 1. Animar partículas de fundo
+      particles.forEach(p => {
+        if (isPlaying) {
+          p.x += p.speedX;
+          p.y += p.speedY;
+          if (p.x < 0) p.x = canvas.width;
+          if (p.x > canvas.width) p.x = 0;
+          if (p.y < 0) p.y = canvas.height;
+          if (p.y > canvas.height) p.y = 0;
+        }
 
-      // Desenho do elemento
-      ctx.fillStyle = theme.primary;
+        ctx.fillStyle = theme.secondary;
+        ctx.globalAlpha = p.alpha * (isPlaying ? 0.8 : 0.2);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      });
+
+      // 2. Núcleo com Gradiente Radial Pulsante
+      const corePulse = isPlaying ? Math.sin(t * 1.5) * 12 : 0;
+      const coreRad = Math.max(10, baseRadius * 0.5 + corePulse);
+      
+      const gradCore = ctx.createRadialGradient(cx, cy, 2, cx, cy, coreRad);
+      gradCore.addColorStop(0, '#ffffff');
+      gradCore.addColorStop(0.3, theme.primary);
+      gradCore.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.fillStyle = gradCore;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, Math.max(5, radius), 0, Math.PI * 2);
+      ctx.arc(cx, cy, coreRad, 0, Math.PI * 2);
       ctx.fill();
+
+      // 3. Anel de Ondas de Áudio / Frequência (Harmônicos)
+      ctx.strokeStyle = theme.secondary;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+
+      for (let i = 0; i <= NUM_POINTS; i++) {
+        const angle = (i / NUM_POINTS) * Math.PI * 2;
+        
+        // Simulação de ondas sonoras com harmônicos senoidais
+        const wave1 = Math.sin(angle * 6 + t * 2) * 16;
+        const wave2 = Math.cos(angle * 12 - t * 3) * 8;
+        const wave3 = Math.sin(t * 4 + i) * 6;
+        
+        const distortion = isPlaying ? (wave1 + wave2 + wave3) : 0;
+        const r = baseRadius + distortion;
+
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+
+      ctx.closePath();
+      ctx.stroke();
+
+      // 4. Raios de Energia Conectando o Núcleo ao Anel
+      if (isPlaying) {
+        ctx.strokeStyle = theme.glow;
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.4;
+        
+        for (let i = 0; i < 16; i++) {
+          const angle = (i / 16) * Math.PI * 2 + (t * 0.2);
+          const r = baseRadius + Math.sin(angle * 4 + t) * 10;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+          ctx.stroke();
+        }
+        ctx.globalAlpha = 1;
+      }
 
       requestAnimationFrame(render);
     }
