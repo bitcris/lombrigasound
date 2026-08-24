@@ -2,5 +2,5 @@ name = "lombrigasound"
 compatibility_date = "2023-08-01"
 main = "_worker.js"
 
-[assets]
+[site]
 bucket = "."
