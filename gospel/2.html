@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Gospel 2</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #030712; overflow: hidden; font-family: system-ui, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let isPlaying = true;
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+    });
+
+    // Partículas flutuantes
+    const particles = Array.from({ length: 45 }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 3 + 1,
+      speedY: Math.random() * 0.8 + 0.3,
+      alpha: Math.random() * 0.7 + 0.3
+    }));
+
+    let t = 0;
+
+    function render() {
+      ctx.fillStyle = 'rgba(3, 7, 18, 0.2)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (isPlaying) t += 0.03;
+
+      const w = canvas.width;
+      const h = canvas.height;
+
+      // Partículas subindo
+      particles.forEach(p => {
+        if (isPlaying) {
+          p.y -= p.speedY;
+          if (p.y < 0) {
+            p.y = h;
+            p.x = Math.random() * w;
+          }
+        }
+        ctx.fillStyle = `rgba(253, 230, 138, ${p.alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Ondas suaves na base (Harmonia acústica)
+      ctx.lineWidth = 3;
+      for (let wave = 0; wave < 3; wave++) {
+        ctx.strokeStyle = `rgba(245, 158, 11, ${0.4 - wave * 0.1})`;
+        ctx.beginPath();
+        for (let x = 0; x < w; x += 10) {
+          const y = (h * 0.7) + Math.sin(t + x * 0.008 + wave) * (isPlaying ? 35 : 5);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+
+      requestAnimationFrame(render);
+    }
+    render();
+  </script>
+</body>
+</html>

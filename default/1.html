@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Universal Default</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #07080c; overflow: hidden; font-family: system-ui, -apple-system, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let isPlaying = true;
+    let genre = 'default';
+
+    // Gera uma paleta baseada no hash do nome do gênero
+    function getHashColor(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      const h = Math.abs(hash) % 360;
+      return {
+        primary: `hsl(${h}, 85%, 55%)`,
+        secondary: `hsl(${(h + 40) % 360}, 90%, 60%)`
+      };
+    }
+
+    const KNOWN_THEMES = {
+      default:   { primary: '#ff6b00', secondary: '#00f0ff', speed: 0.05 },
+      synthwave: { primary: '#ff007f', secondary: '#00f0ff', speed: 0.06 },
+      rock:      { primary: '#ff2a00', secondary: '#ff9900', speed: 0.08 },
+      gospel:    { primary: '#fbbf24', secondary: '#ffffff', speed: 0.035 },
+      country:   { primary: '#d97706', secondary: '#f59e0b', speed: 0.04 },
+      flashback: { primary: '#a855f7', secondary: '#06b6d4', speed: 0.05 },
+      lofi:      { primary: '#a78bfa', secondary: '#f472b6', speed: 0.03 },
+      jazz:      { primary: '#3b82f6', secondary: '#f59e0b', speed: 0.035 }
+    };
+
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+
+      const rawGenre = e.data.genre || e.data.genere;
+      if (rawGenre && typeof rawGenre === 'string') {
+        genre = rawGenre.toLowerCase().trim();
+      }
+    });
+
+    let t = 0;
+    const NUM_BARS = 32;
+
+    function render() {
+      const theme = KNOWN_THEMES[genre] || { ...getHashColor(genre), speed: 0.05 };
+
+      ctx.fillStyle = 'rgba(7, 8, 12, 0.3)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (isPlaying) t += theme.speed;
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const centerX = w / 2;
+      const centerY = h / 2;
+
+      // Barras simétricas de espectro sonoro sintetizado
+      const barWidth = (w * 0.7) / NUM_BARS;
+      const startX = (w - (NUM_BARS * barWidth)) / 2;
+
+      for (let i = 0; i < NUM_BARS; i++) {
+        const offset = Math.abs(i - NUM_BARS / 2);
+        const wave = Math.sin(t + i * 0.25) * Math.cos(t * 0.5 + i * 0.1);
+        const heightMultiplier = Math.max(0.1, Math.abs(wave));
+        const barHeight = heightMultiplier * (h * 0.35) * (isPlaying ? 1 : 0.15);
+
+        const x = startX + i * barWidth;
+        const grad = ctx.createLinearGradient(0, centerY - barHeight, 0, centerY + barHeight);
+        grad.addColorStop(0, theme.secondary);
+        grad.addColorStop(0.5, theme.primary);
+        grad.addColorStop(1, theme.secondary);
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, centerY - barHeight / 2, barWidth - 3, barHeight);
+      }
+
+      // Brilho central
+      const pulseRadius = 20 + Math.sin(t * 1.5) * 8;
+      ctx.fillStyle = theme.primary;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, isPlaying ? pulseRadius : 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      requestAnimationFrame(render);
+    }
+    render();
+  </script>
+</body>
+</html>

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Rock 1</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #060608; overflow: hidden; font-family: system-ui, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let isPlaying = true;
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+    });
+
+    let t = 0;
+    const NUM_BARS = 36;
+
+    function render() {
+      ctx.fillStyle = 'rgba(6, 6, 8, 0.25)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (isPlaying) t += 0.08;
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const centerY = h * 0.55;
+      const barWidth = (w * 0.85) / NUM_BARS;
+      const startX = (w - (NUM_BARS * barWidth)) / 2;
+
+      for (let i = 0; i < NUM_BARS; i++) {
+        const beat = Math.sin(t * 1.5 + i * 0.4) * Math.cos(t * 0.8 + i * 0.2);
+        const noise = (Math.sin(t * 4 + i * 2) + 1) * 0.2;
+        const intensity = isPlaying ? Math.max(0.08, Math.abs(beat) + noise) : 0.05;
+        const barHeight = intensity * (h * 0.45);
+
+        const x = startX + i * barWidth;
+        const grad = ctx.createLinearGradient(0, centerY - barHeight, 0, centerY + barHeight);
+        grad.addColorStop(0, '#ff9900');
+        grad.addColorStop(0.4, '#ff2200');
+        grad.addColorStop(1, '#990000');
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, centerY - barHeight / 2, barWidth - 4, barHeight);
+      }
+
+      requestAnimationFrame(render);
+    }
+    render();
+  </script>
+</body>
+</html>

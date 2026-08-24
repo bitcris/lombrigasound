@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Country 1</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0c0a08; overflow: hidden; font-family: system-ui, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let isPlaying = true;
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+    });
+
+    let t = 0;
+    const NUM_BARS = 28;
+
+    function render() {
+      ctx.fillStyle = 'rgba(12, 10, 8, 0.25)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (isPlaying) t += 0.04;
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const barWidth = (w * 0.8) / NUM_BARS;
+      const startX = (w - (NUM_BARS * barWidth)) / 2;
+
+      for (let i = 0; i < NUM_BARS; i++) {
+        const acoustic = (Math.sin(t + i * 0.3) + Math.cos(t * 0.7 + i * 0.15)) * 0.5;
+        const heightMultiplier = isPlaying ? Math.max(0.1, Math.abs(acoustic)) : 0.05;
+        const barHeight = heightMultiplier * (h * 0.4);
+
+        const x = startX + i * barWidth;
+        const grad = ctx.createLinearGradient(0, h - barHeight, 0, h);
+        grad.addColorStop(0, '#fbbf24');
+        grad.addColorStop(0.5, '#d97706');
+        grad.addColorStop(1, '#78350f');
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, h - barHeight - 40, barWidth - 4, barHeight);
+      }
+
+      requestAnimationFrame(render);
+    }
+    render();
+  </script>
+</body>
+</html>

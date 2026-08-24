@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Synthwave 1</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #0a0515; overflow: hidden; font-family: system-ui, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let isPlaying = true;
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+    });
+
+    let t = 0;
+
+    function render() {
+      ctx.fillStyle = 'rgba(10, 5, 21, 0.25)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (isPlaying) t += 0.05;
+
+      const w = canvas.width;
+      const h = canvas.height;
+      const horizon = h * 0.6;
+
+      // Sol Retro Neon
+      const sunPulse = isPlaying ? Math.sin(t * 2) * 10 : 0;
+      const sunRadius = 70 + sunPulse;
+      const grad = ctx.createLinearGradient(0, horizon - sunRadius * 2, 0, horizon);
+      grad.addColorStop(0, '#fde047');
+      grad.addColorStop(0.5, '#ec4899');
+      grad.addColorStop(1, '#8b5cf6');
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(w / 2, horizon - 10, sunRadius, Math.PI, 0);
+      ctx.fill();
+
+      // Grade de Perspectiva (Grid 80s)
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.5)';
+      ctx.lineWidth = 1.5;
+
+      // Linhas verticais convergentes
+      for (let x = -w * 0.5; x <= w * 1.5; x += w * 0.1) {
+        ctx.beginPath();
+        ctx.moveTo(w / 2, horizon);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+
+      // Linhas horizontais em movimento
+      const offset = (t * 20) % 30;
+      for (let y = horizon; y < h; y += 15) {
+        const currentY = y + (isPlaying ? offset : 0);
+        if (currentY < h) {
+          ctx.beginPath();
+          ctx.moveTo(0, currentY);
+          ctx.lineTo(w, currentY);
+          ctx.stroke();
+        }
+      }
+
+      requestAnimationFrame(render);
+    }
+    render();
+  </script>
+</body>
+</html>

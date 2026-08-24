@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Synthwave 2</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #06020f; overflow: hidden; font-family: system-ui, sans-serif; }
+    canvas { display: block; width: 100vw; height: 100vh; }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let isPlaying = true;
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+    });
+
+    let t = 0;
+    const NUM_RINGS = 12;
+
+    function render() {
+      ctx.fillStyle = 'rgba(6, 2, 15, 0.2)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (isPlaying) t += 0.04;
+
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+
+      // Túnel de anéis neon pulsantes
+      for (let i = 0; i < NUM_RINGS; i++) {
+        const progress = (i / NUM_RINGS + (isPlaying ? t * 0.2 : 0)) % 1;
+        const radius = Math.pow(progress, 2) * (Math.min(canvas.width, canvas.height) * 0.6);
+        const alpha = progress;
+
+        ctx.strokeStyle = i % 2 === 0 ? `rgba(236, 72, 153, ${alpha})` : `rgba(6, 182, 212, ${alpha})`;
+        ctx.lineWidth = 2 + progress * 4;
+
+        ctx.beginPath();
+        // Anel octogonal futurista
+        for (let a = 0; a < 8; a++) {
+          const angle = (a / 8) * Math.PI * 2 + (isPlaying ? t * 0.1 : 0);
+          const x = cx + Math.cos(angle) * radius;
+          const y = cy + Math.sin(angle) * radius;
+          if (a === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      requestAnimationFrame(render);
+    }
+    render();
+  </script>
+</body>
+</html>
