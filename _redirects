@@ -1,4 +1,4 @@
 # Cloudflare Pages Redirects / Rewrites
 # Se o arquivo estático existir, entrega diretamente.
-# Se a rota não existir, entrega o default/index.html com status 200 (rewrite transparente)
-/*    /default/index.html   200
+# Se a rota não existir, entrega o default/1.html com status 200 (fallback)
+/*    /default/1.html   200

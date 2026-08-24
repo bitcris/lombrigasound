@@ -1,6 +1,6 @@
 export default {
   async fetch(request, env, ctx) {
-    // 1. Tratamento de CORS Preflight
+    // 1. Tratamento de CORS Preflight (OPTIONS)
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         headers: {
@@ -15,15 +15,16 @@ export default {
     const url = new URL(request.url);
     const cleanPath = url.pathname.replace(/\/+$/, '').toLowerCase() || '/';
 
-    // 🎲 Variações de cada gênero
+    // 🎲 Pools de variações por gênero
     const GENRE_POOLS = {
       '/gospel': ['/gospel/1.html', '/gospel/2.html'],
       '/rock': ['/rock/1.html', '/rock/2.html'],
       '/country': ['/country/1.html', '/country/2.html'],
-      '/synthwave': ['/synthwave/1.html', '/synthwave/2.html']
+      '/synthwave': ['/synthwave/1.html', '/synthwave/2.html'],
+      '/default': ['/default/1.html']
     };
 
-    // Helper para injetar cabeçalhos liberando <iframe>
+    // Helper para injetar cabeçalhos liberando <iframe> em qualquer domínio
     const withIframeHeaders = (response) => {
       if (!response) return new Response('Not Found', { status: 404 });
       const headers = new Headers(response.headers);
@@ -39,9 +40,15 @@ export default {
       });
     };
 
-    // 2. Se o binding de assets estiver ativo (Cloudflare Pages / Workers)
+    // Execução via Cloudflare Pages
     if (env && env.ASSETS) {
-      // Se for uma rota de gênero mapeada, sorteia a variação
+      // Caso 1: Hub Central de Preview (raiz)
+      if (cleanPath === '/' || cleanPath === '/index.html') {
+        const res = await env.ASSETS.fetch(new Request(new URL('/index.html', url.origin)));
+        return withIframeHeaders(res);
+      }
+
+      // Caso 2: Rota de Gênero Mapeada -> Sorteia uma variação
       if (GENRE_POOLS[cleanPath]) {
         const pool = GENRE_POOLS[cleanPath];
         const chosen = pool[Math.floor(Math.random() * pool.length)];
@@ -49,19 +56,20 @@ export default {
         return withIframeHeaders(res);
       }
 
-      // Tenta servir o arquivo estático requisitado
-      const res = await env.ASSETS.fetch(request);
-      if (res.status !== 404) {
-        return withIframeHeaders(res);
+      // Caso 3: Arquivos diretos com extensão (ex: /rock/1.html, /exemplo.html, /favicon.ico)
+      if (cleanPath.includes('.')) {
+        const res = await env.ASSETS.fetch(request);
+        if (res.status === 200) {
+          return withIframeHeaders(res);
+        }
       }
 
-      // 3. Fallback Universal (status 200 para qualquer rota inexistente)
+      // Caso 4: Fallback Universal -> Qualquer rota inexistente responde com o visualizador default
       const fallbackRes = await env.ASSETS.fetch(new Request(new URL('/default/1.html', url.origin)));
       return withIframeHeaders(fallbackRes);
     }
 
-    // Proteção contra loop recursivo (Error 1042)
-    return new Response('Lombrigasound: Para rodar com arquivos estáticos, faça o deploy via Cloudflare Pages: npx wrangler pages deploy .', {
+    return new Response('Lombrigasound Pages: env.ASSETS indisponível.', {
       status: 200,
       headers: {
         'Content-Type': 'text/plain; charset=utf-8',
