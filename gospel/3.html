@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lombrigasound - Gospel 3 (Catedral de Luz & Halo Celestial)</title>
+  <title>Lombrigasound - Gospel 3 (Catedral da Luz & Rosácea Divina)</title>
   <style>
     * {
       margin: 0;
@@ -11,7 +11,7 @@
       box-sizing: border-box;
     }
     body {
-      background: #03050b;
+      background: #020306;
       overflow: hidden;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
@@ -27,10 +27,10 @@
 
   <script>
     /**
-     * Lombrigasound - Gospel 3: Catedral de Luz & Halo Celestial
+     * Lombrigasound - Gospel 3: Catedral da Luz & Rosácea Divina
      * 
-     * Paleta: Ouro divino (#fbbf24, #f59e0b), Branco celestial (#ffffff), Âmbar suave (#d97706)
-     * Elementos: Feixes volumétricos divinos, anéis de harmonia sagrada e partículas de graça.
+     * Paleta: Ouro divino (#fbbf24, #f59e0b), Luz celestial (#ffffff), Âmbar sagrado (#d97706), Éter profundo (#020306)
+     * Elementos: Feixes volumétricos de luz (God rays), rosácea gótica sagrada, poeira estelar de graça e harmonia polifônica.
      */
 
     const canvas = document.getElementById('c');
@@ -43,7 +43,7 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // 📡 Listener postMessage
+    // 📡 Listener Obrigatório de postMessage
     let isPlaying = true;
     let audioData = null;
 
@@ -59,25 +59,25 @@
       }
     });
 
-    // 🌟 Sistema de Partículas de Graça (Centelhas de Luz)
+    // 🌟 Sistema de Poeira Celestial de Catedral
     const NUM_PARTICLES = 65;
     const particles = Array.from({ length: NUM_PARTICLES }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
-      size: Math.random() * 2.8 + 1,
-      speedY: Math.random() * 0.6 + 0.25,
+      size: Math.random() * 2.5 + 0.8,
+      speedY: Math.random() * 0.5 + 0.2,
       driftPhase: Math.random() * Math.PI * 2,
       driftSpeed: Math.random() * 0.02 + 0.01,
       baseAlpha: Math.random() * 0.6 + 0.3,
       glowColor: Math.random() > 0.35 ? 'rgba(251, 191, 36,' : 'rgba(255, 255, 255,'
     }));
 
-    // 🕊️ Feixes de Luz Volumétrica Descendente
-    const NUM_SHAFTS = 9;
+    // 🕊️ Feixes Volumétricos Crepusculares (God Rays)
+    const NUM_SHAFTS = 11;
     const lightShafts = Array.from({ length: NUM_SHAFTS }, (_, i) => ({
-      angleOffset: ((i - (NUM_SHAFTS - 1) / 2) * 0.14),
-      widthFactor: 0.18 + (i % 3) * 0.06,
-      speed: 0.5 + Math.random() * 0.4,
+      angleOffset: ((i - (NUM_SHAFTS - 1) / 2) * 0.12),
+      widthFactor: 0.16 + (i % 3) * 0.05,
+      speed: 0.4 + Math.random() * 0.3,
       phase: Math.random() * Math.PI * 2
     }));
 
@@ -87,62 +87,61 @@
       const w = canvas.width;
       const h = canvas.height;
       const cx = w / 2;
-      const cy = h * 0.45;
+      const cy = h * 0.42;
 
-      // 1. Limpeza com rastro suave
-      ctx.fillStyle = 'rgba(3, 5, 11, 0.22)';
+      // 1. Limpeza de fundo com rastro suave
+      ctx.fillStyle = 'rgba(2, 3, 6, 0.22)';
       ctx.fillRect(0, 0, w, h);
 
       if (isPlaying) {
         t += 0.02;
       }
 
-      // Intensidade reativa
-      const pulseIntensity = isPlaying ? (1 + Math.sin(t * 2) * 0.15) : 0.4;
+      const pulseIntensity = isPlaying ? (1 + Math.sin(t * 2) * 0.1) : 0.95;
       const maxRadius = Math.min(w, h) * 0.32;
 
-      // 2. Feixes Volumétricos de Luz (Pilar e Frestas de Catedral)
+      // 2. Feixes Volumétricos de Luz (Pórtico Celestial)
       ctx.save();
       ctx.globalCompositeOperation = 'screen';
+
       lightShafts.forEach((shaft) => {
-        const shaftAlpha = (0.07 + Math.sin(t * shaft.speed + shaft.phase) * 0.04) * (isPlaying ? 1 : 0.3);
-        const topX = cx + Math.sin(t * 0.3 + shaft.phase) * (w * 0.08);
-        const topY = -50;
-        const spreadAngle = shaft.angleOffset + Math.sin(t * 0.5 + shaft.phase) * 0.03;
-        const bottomLen = h * 1.3;
+        const shaftAlpha = (0.08 + Math.sin(t * shaft.speed + shaft.phase) * 0.04) * (isPlaying ? 1 : 0.4);
+        const topX = cx + Math.sin(t * 0.2 + shaft.phase) * (w * 0.06);
+        const topY = -60;
+        const spreadAngle = shaft.angleOffset + Math.sin(t * 0.4 + shaft.phase) * 0.02;
+        const bottomLen = h * 1.35;
         const botX = topX + Math.sin(spreadAngle) * bottomLen;
         const botY = topY + Math.cos(spreadAngle) * bottomLen;
         const shaftWidth = (w * shaft.widthFactor);
 
         const shaftGrad = ctx.createLinearGradient(topX, topY, botX, botY);
-        shaftGrad.addColorStop(0, `rgba(255, 250, 220, ${shaftAlpha * 1.8})`);
-        shaftGrad.addColorStop(0.3, `rgba(251, 191, 36, ${shaftAlpha * 1.2})`);
-        shaftGrad.addColorStop(0.7, `rgba(245, 158, 11, ${shaftAlpha * 0.6})`);
-        shaftGrad.addColorStop(1, 'rgba(3, 5, 11, 0)');
+        shaftGrad.addColorStop(0, `rgba(255, 255, 240, ${shaftAlpha * 2.0})`);
+        shaftGrad.addColorStop(0.3, `rgba(251, 191, 36, ${shaftAlpha * 1.3})`);
+        shaftGrad.addColorStop(0.65, `rgba(245, 158, 11, ${shaftAlpha * 0.6})`);
+        shaftGrad.addColorStop(1, 'rgba(2, 3, 6, 0)');
 
         ctx.fillStyle = shaftGrad;
         ctx.beginPath();
-        ctx.moveTo(topX - 10, topY);
-        ctx.lineTo(topX + 10, topY);
+        ctx.moveTo(topX - 15, topY);
+        ctx.lineTo(topX + 15, topY);
         ctx.lineTo(botX + shaftWidth, botY);
         ctx.lineTo(botX - shaftWidth, botY);
         ctx.closePath();
         ctx.fill();
       });
-      ctx.restore();
 
-      // 3. Partículas de Graça Flutuantes (Elevação Espiritual)
+      // 3. Poeira de Graça Flutuante nas Frestas de Luz
       particles.forEach((p) => {
         if (isPlaying) {
           p.y -= p.speedY;
-          p.x += Math.sin(t + p.driftPhase) * 0.4;
+          p.x += Math.sin(t + p.driftPhase) * 0.35;
           if (p.y < -10) {
             p.y = h + 10;
             p.x = Math.random() * w;
           }
         }
 
-        const twinkle = 0.7 + Math.sin(t * 3 + p.driftPhase) * 0.3;
+        const twinkle = 0.7 + Math.sin(t * 3.5 + p.driftPhase) * 0.3;
         const currentAlpha = p.baseAlpha * twinkle * (isPlaying ? 1 : 0.4);
 
         ctx.fillStyle = `${p.glowColor}${currentAlpha})`;
@@ -150,30 +149,29 @@
         ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
         ctx.fill();
 
-        // Aura sutil nas partículas maiores
-        if (p.size > 2.2) {
-          ctx.fillStyle = `${p.glowColor}${currentAlpha * 0.25})`;
+        if (p.size > 2.0) {
+          ctx.fillStyle = `${p.glowColor}${currentAlpha * 0.3})`;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * 2.6, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, p.size * 2.5, 0, Math.PI * 2);
           ctx.fill();
         }
       });
 
-      // 4. Anéis Sagrados & Rosácea de Harmônicos (Halo Celestial)
+      // 4. Rosácea Gótica da Catedral & Anéis Sagrados
       const numRings = 4;
       for (let r = 0; r < numRings; r++) {
-        const ringRad = maxRadius * (0.35 + r * 0.22) * pulseIntensity;
-        const ringAlpha = (0.28 - r * 0.05) * (isPlaying ? 1 : 0.5);
+        const ringRad = maxRadius * (0.32 + r * 0.21) * pulseIntensity;
+        const ringAlpha = (0.3 - r * 0.05) * (isPlaying ? 1 : 0.4);
         const points = 72;
         
-        ctx.strokeStyle = r % 2 === 0 ? `rgba(251, 191, 36, ${ringAlpha})` : `rgba(255, 255, 255, ${ringAlpha * 0.9})`;
-        ctx.lineWidth = r === 0 ? 3 : 1.8;
+        ctx.strokeStyle = r % 2 === 0 ? `rgba(251, 191, 36, ${ringAlpha})` : `rgba(254, 240, 138, ${ringAlpha * 0.9})`;
+        ctx.lineWidth = r === 0 ? 2.8 : 1.6;
         ctx.beginPath();
 
         for (let i = 0; i <= points; i++) {
           const theta = (i / points) * Math.PI * 2;
-          const harmonic1 = Math.sin(theta * (6 + r * 2) + t * (r % 2 === 0 ? 1.5 : -1.2)) * (isPlaying ? (8 + r * 3) : 2);
-          const harmonic2 = Math.cos(theta * 12 - t * 2) * (isPlaying ? 4 : 1);
+          const harmonic1 = Math.sin(theta * (8 + r * 2) + t * (r % 2 === 0 ? 1.4 : -1.2)) * (isPlaying ? (7 + r * 2.5) : 2);
+          const harmonic2 = Math.cos(theta * 16 - t * 2.2) * (isPlaying ? 4 : 1);
           const radiusWithWaves = ringRad + harmonic1 + harmonic2;
 
           const px = cx + Math.cos(theta) * radiusWithWaves;
@@ -186,48 +184,60 @@
         ctx.stroke();
       }
 
-      // 5. Raios Cruciformes / Estrela de Belém no Núcleo
-      const coreSize = 38 * pulseIntensity;
-      ctx.save();
-      ctx.globalCompositeOperation = 'screen';
+      // Rosácea Central: 8 Pétalas Entrelaçadas
+      const numPetals = 8;
+      for (let i = 0; i < numPetals; i++) {
+        const angle = (i / numPetals) * Math.PI * 2 + (isPlaying ? t * 0.15 : 0);
+        const petalDist = maxRadius * 0.42 * pulseIntensity;
+        const px = cx + Math.cos(angle) * petalDist;
+        const py = cy + Math.sin(angle) * petalDist;
+        const pRad = maxRadius * 0.28 * pulseIntensity;
 
-      const gradCore = ctx.createRadialGradient(cx, cy, 2, cx, cy, coreSize * 2.8);
+        ctx.strokeStyle = 'rgba(254, 240, 138, 0.4)';
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.arc(px, py, pRad, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // 5. Estrela da Alva / Núcleo de Glória
+      const coreSize = 36 * pulseIntensity;
+      const gradCore = ctx.createRadialGradient(cx, cy, 2, cx, cy, coreSize * 3);
       gradCore.addColorStop(0, '#ffffff');
       gradCore.addColorStop(0.2, '#fef08a');
-      gradCore.addColorStop(0.5, 'rgba(251, 191, 36, 0.7)');
+      gradCore.addColorStop(0.5, 'rgba(251, 191, 36, 0.75)');
       gradCore.addColorStop(0.8, 'rgba(245, 158, 11, 0.3)');
       gradCore.addColorStop(1, 'rgba(217, 119, 6, 0)');
 
       ctx.fillStyle = gradCore;
       ctx.beginPath();
-      ctx.arc(cx, cy, coreSize * 2.8, 0, Math.PI * 2);
+      ctx.arc(cx, cy, coreSize * 3, 0, Math.PI * 2);
       ctx.fill();
 
-      // Raios de Cruz de Glória
-      const crossLengths = [
-        { angle: 0, len: maxRadius * 0.85, w: 2.5 },
-        { angle: Math.PI / 2, len: maxRadius * 0.85, w: 2.5 },
-        { angle: Math.PI, len: maxRadius * 0.85, w: 2.5 },
-        { angle: Math.PI * 1.5, len: maxRadius * 0.85, w: 2.5 },
-        // Raios diagonais menores
-        { angle: Math.PI / 4, len: maxRadius * 0.45, w: 1.2 },
-        { angle: 3 * Math.PI / 4, len: maxRadius * 0.45, w: 1.2 },
-        { angle: 5 * Math.PI / 4, len: maxRadius * 0.45, w: 1.2 },
-        { angle: 7 * Math.PI / 4, len: maxRadius * 0.45, w: 1.2 }
+      // Raios Cruciformes Cardinais e Diagonais
+      const crossRays = [
+        { angle: 0, len: maxRadius * 0.9, w: 2.8 },
+        { angle: Math.PI / 2, len: maxRadius * 0.9, w: 2.8 },
+        { angle: Math.PI, len: maxRadius * 0.9, w: 2.8 },
+        { angle: Math.PI * 1.5, len: maxRadius * 0.9, w: 2.8 },
+        { angle: Math.PI / 4, len: maxRadius * 0.48, w: 1.4 },
+        { angle: 3 * Math.PI / 4, len: maxRadius * 0.48, w: 1.4 },
+        { angle: 5 * Math.PI / 4, len: maxRadius * 0.48, w: 1.4 },
+        { angle: 7 * Math.PI / 4, len: maxRadius * 0.48, w: 1.4 }
       ];
 
-      crossLengths.forEach(ray => {
-        const rotation = isPlaying ? Math.sin(t * 0.5) * 0.05 : 0;
+      crossRays.forEach(ray => {
+        const rotation = isPlaying ? Math.sin(t * 0.4) * 0.04 : 0;
         const effAngle = ray.angle + rotation;
-        const rayLen = ray.len * (isPlaying ? (0.9 + Math.sin(t * 3 + ray.angle) * 0.15) : 0.6);
+        const rayLen = ray.len * (isPlaying ? (0.92 + Math.sin(t * 3 + ray.angle) * 0.12) : 0.65);
 
         const rayGrad = ctx.createLinearGradient(
           cx, cy,
           cx + Math.cos(effAngle) * rayLen,
           cy + Math.sin(effAngle) * rayLen
         );
-        rayGrad.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-        rayGrad.addColorStop(0.4, 'rgba(251, 191, 36, 0.6)');
+        rayGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+        rayGrad.addColorStop(0.35, 'rgba(251, 191, 36, 0.6)');
         rayGrad.addColorStop(1, 'rgba(245, 158, 11, 0)');
 
         ctx.strokeStyle = rayGrad;
@@ -238,21 +248,19 @@
         ctx.stroke();
       });
 
-      ctx.restore();
-
-      // 6. Ondas de Louvor na Base (Harmonia Polifônica)
+      // 6. Ondas Polifônicas de Órgão / Louvor na Base
       const numWaves = 4;
       for (let wIdx = 0; wIdx < numWaves; wIdx++) {
-        const waveBaseY = h * 0.82 + (wIdx * 18);
-        const waveAlpha = (0.35 - wIdx * 0.07) * (isPlaying ? 1 : 0.3);
+        const waveBaseY = h * 0.80 + (wIdx * 18);
+        const waveAlpha = (0.38 - wIdx * 0.08) * (isPlaying ? 1 : 0.35);
         
-        ctx.strokeStyle = wIdx % 2 === 0 ? `rgba(251, 191, 36, ${waveAlpha})` : `rgba(254, 240, 138, ${waveAlpha * 0.8})`;
+        ctx.strokeStyle = wIdx % 2 === 0 ? `rgba(251, 191, 36, ${waveAlpha})` : `rgba(254, 240, 138, ${waveAlpha * 0.85})`;
         ctx.lineWidth = 2.2;
         ctx.beginPath();
 
-        for (let x = 0; x <= w; x += 15) {
+        for (let x = 0; x <= w; x += 12) {
           const freq = 0.005 + wIdx * 0.002;
-          const amp = isPlaying ? (18 + wIdx * 8 + Math.sin(t * 2 + wIdx) * 6) : 4;
+          const amp = isPlaying ? (16 + wIdx * 6 + Math.sin(t * 2 + wIdx) * 5) : 3;
           const y = waveBaseY + Math.sin(x * freq + t * (1.2 + wIdx * 0.3)) * amp;
 
           if (x === 0) ctx.moveTo(x, y);
@@ -260,6 +268,8 @@
         }
         ctx.stroke();
       }
+
+      ctx.restore();
 
       requestAnimationFrame(render);
     }
