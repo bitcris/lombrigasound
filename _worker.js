@@ -22,7 +22,7 @@ export default {
       '/rock': ['/rock/1.html', '/rock/2.html'],
       '/country': ['/country/1.html', '/country/2.html'],
       '/synthwave': ['/synthwave/1.html', '/synthwave/2.html'],
-      '/default': ['/default/1.html', '/default/2.html', '/default/3.html']
+      '/default': ['/default/1.html', '/default/2.html', '/default/3.html', '/default/4.html', '/default/5.html']
     };
 
     const withIframeHeaders = (response) => {

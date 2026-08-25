@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Universal 4 (Túnel Hiperespacial & Wireframe Demoscene)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #020208;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    /**
+     * Lombrigasound - Universal Default 4: Túnel Hiperespacial & Wireframe Demoscene
+     * 
+     * Estilo: Wireframe tridimensional vetorial, túnel poligonal hipersônico infinito e poliedro central reativo.
+     * Paleta: Adaptativa baseada no gênero recebido ou padrão Demoscene (Ciano elétrico, Magenta laser, Roxo neon).
+     */
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 📡 Listener Obrigatório de postMessage
+    let isPlaying = true;
+    let genre = 'default';
+    let audioData = null;
+
+    function getHashTheme(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      const h = Math.abs(hash) % 360;
+      return {
+        primary: `hsl(${h}, 95%, 60%)`,
+        secondary: `hsl(${(h + 60) % 360}, 95%, 65%)`,
+        glow: `hsl(${(h + 120) % 360}, 90%, 55%)`
+      };
+    }
+
+    const THEMES = {
+      default:   { primary: '#00f0ff', secondary: '#ff007f', glow: '#7928ca' },
+      synthwave: { primary: '#ff007f', secondary: '#00f0ff', glow: '#7928ca' },
+      rock:      { primary: '#ff2a00', secondary: '#ff9900', glow: '#ff0055' },
+      gospel:    { primary: '#fbbf24', secondary: '#ffffff', glow: '#f59e0b' },
+      country:   { primary: '#d97706', secondary: '#fde047', glow: '#ea580c' },
+      news:      { primary: '#ef4444', secondary: '#06b6d4', glow: '#3b82f6' }
+    };
+
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+
+      const rawGenre = e.data.genre || e.data.genere;
+      if (rawGenre && typeof rawGenre === 'string') {
+        genre = rawGenre.toLowerCase().trim();
+      }
+      if (e.data.audioData && Array.isArray(e.data.audioData)) {
+        audioData = e.data.audioData;
+      }
+    });
+
+    // 💠 Anéis do Túnel Poligonal 3D (Hexágonos em Profundidade)
+    const NUM_RINGS = 16;
+    const tunnelRings = Array.from({ length: NUM_RINGS }, (_, i) => ({
+      z: (i / NUM_RINGS) * 1000,
+      sides: 6,
+      rotOffset: (i * 0.08)
+    }));
+
+    // 🌐 Vértices de Poliedro Central 3D (Icosaedro / Octaedro)
+    const CORE_NODES = [
+      { x: 1, y: 0, z: 0 }, { x: -1, y: 0, z: 0 },
+      { x: 0, y: 1, z: 0 }, { x: 0, y: -1, z: 0 },
+      { x: 0, y: 0, z: 1 }, { x: 0, y: 0, z: -1 },
+      { x: 0.7, y: 0.7, z: 0.7 }, { x: -0.7, y: -0.7, z: -0.7 },
+      { x: 0.7, y: -0.7, z: 0.7 }, { x: -0.7, y: 0.7, z: -0.7 }
+    ];
+
+    let t = 0;
+
+    function render() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const minDim = Math.min(w, h);
+
+      const theme = THEMES[genre] || getHashTheme(genre);
+
+      // 1. Fundo com persistência suave
+      ctx.fillStyle = 'rgba(2, 2, 8, 0.22)';
+      ctx.fillRect(0, 0, w, h);
+
+      if (isPlaying) {
+        t += 0.016; // Ritmo suave e fluido
+      }
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+
+      // 2. Anéis Hexagonais do Túnel Hiperespacial
+      tunnelRings.forEach((ring, idx) => {
+        if (isPlaying) {
+          ring.z -= 2.2;
+          if (ring.z <= 10) ring.z = 1000;
+        }
+
+        const scale = 380 / ring.z;
+        const radius = minDim * 0.75 * scale;
+        const ringAlpha = Math.min(0.65, (1 - ring.z / 1000) * 0.8) * (isPlaying ? 1 : 0.35);
+
+        ctx.strokeStyle = idx % 2 === 0 ? theme.primary : theme.secondary;
+        ctx.lineWidth = Math.max(1, 2.5 * scale);
+        ctx.beginPath();
+
+        const sides = ring.sides;
+        const rot = t * 0.3 + ring.rotOffset;
+
+        for (let s = 0; s <= sides; s++) {
+          const theta = (s / sides) * Math.PI * 2 + rot;
+          const harmonic = isPlaying ? Math.sin(t * 3 + theta * 3) * (8 * scale) : 0;
+          const r = radius + harmonic;
+
+          const px = cx + Math.cos(theta) * r;
+          const py = cy + Math.sin(theta) * r;
+
+          if (s === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      });
+
+      // 3. Poliedro Wireframe Central com Rotação 3D
+      const coreSize = minDim * 0.18 * (isPlaying ? (1 + Math.sin(t * 2.5) * 0.08) : 1);
+      const rotX = t * 0.4;
+      const rotY = t * 0.6;
+      const rotZ = t * 0.2;
+
+      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      const cosZ = Math.cos(rotZ), sinZ = Math.sin(rotZ);
+
+      // Projetar nós 3D
+      const projNodes = CORE_NODES.map(node => {
+        // Rot Y
+        let x1 = node.x * cosY + node.z * sinY;
+        let y1 = node.y;
+        let z1 = -node.x * sinY + node.z * cosY;
+
+        // Rot X
+        let x2 = x1;
+        let y2 = y1 * cosX - z1 * sinX;
+        let z2 = y1 * sinX + z1 * cosX;
+
+        // Rot Z
+        let x3 = x2 * cosZ - y2 * sinZ;
+        let y3 = x2 * sinZ + y2 * cosZ;
+        let z3 = z2;
+
+        const k = 300 / (300 + z3 * 100);
+        return {
+          px: cx + x3 * coreSize * k,
+          py: cy + y3 * coreSize * k,
+          z: z3
+        };
+      });
+
+      // Conectar linhas entre os nós do poliedro
+      ctx.strokeStyle = theme.glow;
+      ctx.lineWidth = 1.8;
+      for (let i = 0; i < projNodes.length; i++) {
+        for (let j = i + 1; j < projNodes.length; j++) {
+          const dx = projNodes[i].px - projNodes[j].px;
+          const dy = projNodes[i].py - projNodes[j].py;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < coreSize * 1.6) {
+            ctx.beginPath();
+            ctx.moveTo(projNodes[i].px, projNodes[i].py);
+            ctx.lineTo(projNodes[j].px, projNodes[j].py);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Pontos brilhantes nos vértices
+      projNodes.forEach(node => {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(node.px, node.py, 3, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 4. Feixes de Luz Radiais em Forma de Laser
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2 + t * 0.15;
+        const len = minDim * 0.48;
+        const lx = cx + Math.cos(angle) * len;
+        const ly = cy + Math.sin(angle) * len;
+
+        const laserGrad = ctx.createLinearGradient(cx, cy, lx, ly);
+        laserGrad.addColorStop(0, '#ffffff');
+        laserGrad.addColorStop(0.3, theme.primary);
+        laserGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.strokeStyle = laserGrad;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(lx, ly);
+        ctx.stroke();
+      }
+
+      ctx.restore();
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>

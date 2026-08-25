@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Universal 5 (Fitas de Aurora & Fibras Ópticas)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #02040b;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    /**
+     * Lombrigasound - Universal Default 5: Fitas de Aurora & Fibras Ópticas
+     * 
+     * Estilo: Fitas fluidas de luz de aurora boreal, ondas ópticas de alta fidelidade e esporos bioluminescentes flutuantes.
+     * Paleta: Espectro de aurora prismática (Esmeralda, Violeta elétrico, Turquesa, Âmbar suave).
+     */
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 📡 Listener Obrigatório de postMessage
+    let isPlaying = true;
+    let genre = 'default';
+    let audioData = null;
+
+    function getHashTheme(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      const h = Math.abs(hash) % 360;
+      return {
+        primary: `hsl(${h}, 90%, 60%)`,
+        secondary: `hsl(${(h + 70) % 360}, 95%, 65%)`,
+        glow: `hsl(${(h + 140) % 360}, 85%, 55%)`
+      };
+    }
+
+    const THEMES = {
+      default:   { primary: '#10b981', secondary: '#06b6d4', glow: '#8b5cf6' },
+      synthwave: { primary: '#ec4899', secondary: '#00f0ff', glow: '#a855f7' },
+      rock:      { primary: '#ff3b00', secondary: '#f59e0b', glow: '#ef4444' },
+      gospel:    { primary: '#fbbf24', secondary: '#ffffff', glow: '#f59e0b' },
+      country:   { primary: '#d97706', secondary: '#fde047', glow: '#ea580c' },
+      news:      { primary: '#ef4444', secondary: '#38bdf8', glow: '#1d4ed8' }
+    };
+
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+
+      const rawGenre = e.data.genre || e.data.genere;
+      if (rawGenre && typeof rawGenre === 'string') {
+        genre = rawGenre.toLowerCase().trim();
+      }
+      if (e.data.audioData && Array.isArray(e.data.audioData)) {
+        audioData = e.data.audioData;
+      }
+    });
+
+    // ✨ Esporos Bioluminescentes Flutuantes
+    const NUM_SPORES = 50;
+    const spores = Array.from({ length: NUM_SPORES }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 2.8 + 1,
+      speedX: (Math.random() - 0.5) * 0.4,
+      speedY: -Math.random() * 0.5 - 0.2,
+      phase: Math.random() * Math.PI * 2,
+      alpha: Math.random() * 0.6 + 0.3
+    }));
+
+    // 🌊 Fitas de Luz Ópticas
+    const NUM_RIBBONS = 6;
+
+    let t = 0;
+
+    function render() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const theme = THEMES[genre] || getHashTheme(genre);
+
+      // 1. Limpeza de fundo com rastro suave
+      ctx.fillStyle = 'rgba(2, 4, 11, 0.22)';
+      ctx.fillRect(0, 0, w, h);
+
+      if (isPlaying) {
+        t += 0.015; // Ritmo lento, sereno e meditativo
+      }
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+
+      // 2. Fitas de Aurora Fluida Ondulando em Bezier
+      for (let r = 0; r < NUM_RIBBONS; r++) {
+        const ribbonBaseY = (h * 0.3) + (r * (h * 0.08));
+        const ribbonAlpha = (0.45 - r * 0.05) * (isPlaying ? 1 : 0.4);
+        const color = r % 3 === 0 ? theme.primary : r % 3 === 1 ? theme.secondary : theme.glow;
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+
+        const segments = 60;
+        const stepX = w / segments;
+
+        for (let i = 0; i <= segments; i++) {
+          const x = i * stepX;
+          const wave1 = Math.sin(i * 0.12 + t * 1.8 + r * 0.8) * (isPlaying ? 35 : 5);
+          const wave2 = Math.cos(i * 0.06 - t * 1.2 + r * 0.5) * (isPlaying ? 22 : 3);
+          const wave3 = Math.sin(i * 0.2 + t * 2.5) * (isPlaying ? 12 : 0);
+          const y = ribbonBaseY + wave1 + wave2 + wave3;
+
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        // Véu translúcido sob a fita de aurora
+        ctx.fillStyle = color;
+        ctx.globalAlpha = ribbonAlpha * 0.12;
+        ctx.lineTo(w, h);
+        ctx.lineTo(0, h);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+
+      // 3. Feixes de Fibras Ópticas Verticais / Cortina de Luz
+      const numFibers = 28;
+      const fiberSpacing = w / (numFibers - 1);
+      for (let i = 0; i < numFibers; i++) {
+        const fx = i * fiberSpacing;
+        const fiberAlpha = (0.25 + Math.sin(t * 2 + i * 0.4) * 0.15) * (isPlaying ? 1 : 0.3);
+        const fiberH = h * (0.4 + Math.sin(t * 1.5 + i * 0.5) * 0.2);
+
+        const fGrad = ctx.createLinearGradient(fx, 0, fx, fiberH);
+        fGrad.addColorStop(0, `rgba(255, 255, 255, ${fiberAlpha * 1.2})`);
+        fGrad.addColorStop(0.3, theme.secondary);
+        fGrad.addColorStop(1, 'rgba(2, 4, 11, 0)');
+
+        ctx.strokeStyle = fGrad;
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(fx, 0);
+        ctx.lineTo(fx + Math.sin(t + i) * 15, fiberH);
+        ctx.stroke();
+      }
+
+      // 4. Esporos Bioluminescentes em Ascensão
+      spores.forEach(spore => {
+        if (isPlaying) {
+          spore.x += spore.speedX + Math.sin(t * 2 + spore.phase) * 0.3;
+          spore.y += spore.speedY;
+
+          if (spore.y < -10) {
+            spore.y = h + 10;
+            spore.x = Math.random() * w;
+          }
+        }
+
+        const twinkle = 0.7 + Math.sin(t * 3.5 + spore.phase) * 0.3;
+        const currentAlpha = spore.alpha * twinkle * (isPlaying ? 1 : 0.4);
+
+        // Aura
+        const sGrad = ctx.createRadialGradient(spore.x, spore.y, 1, spore.x, spore.y, spore.size * 3.5);
+        sGrad.addColorStop(0, '#ffffff');
+        sGrad.addColorStop(0.4, theme.primary);
+        sGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = sGrad;
+        ctx.beginPath();
+        ctx.arc(spore.x, spore.y, spore.size * 3.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.restore();
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>
