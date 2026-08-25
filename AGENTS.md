@@ -178,6 +178,8 @@ lombrigasound/
 │   └── index.html
 └── default/              # Visualizador universal de fallback
     ├── 1.html
+    ├── 2.html
+    ├── 3.html
     └── index.html
 ```
 

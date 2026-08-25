@@ -22,7 +22,7 @@ export default {
       '/rock': ['/rock/1.html', '/rock/2.html'],
       '/country': ['/country/1.html', '/country/2.html'],
       '/synthwave': ['/synthwave/1.html', '/synthwave/2.html'],
-      '/default': ['/default/1.html']
+      '/default': ['/default/1.html', '/default/2.html', '/default/3.html']
     };
 
     const withIframeHeaders = (response) => {
@@ -64,8 +64,10 @@ export default {
           }
         }
 
-        // Caso 4: Fallback Universal -> Qualquer rota desconhecida serve /default/1.html
-        const fallbackRes = await env.ASSETS.fetch(new Request(new URL('/default/1.html', url.origin)));
+        // Caso 4: Fallback Universal -> Qualquer rota desconhecida sorteia do pool /default
+        const defaultPool = GENRE_POOLS['/default'] || ['/default/1.html'];
+        const chosenFallback = defaultPool[Math.floor(Math.random() * defaultPool.length)];
+        const fallbackRes = await env.ASSETS.fetch(new Request(new URL(chosenFallback, url.origin)));
         return withIframeHeaders(fallbackRes);
       } catch (err) {
         return new Response('Fallback Error: ' + err.message, { status: 500 });

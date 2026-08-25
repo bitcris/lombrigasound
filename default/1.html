@@ -3,17 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lombrigasound - Universal Default</title>
+  <title>Lombrigasound - Universal 1 (Cosmos & Nebulosa Galáctica)</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #07080c; overflow: hidden; font-family: system-ui, -apple-system, sans-serif; }
-    canvas { display: block; width: 100vw; height: 100vh; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #020308;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
   </style>
 </head>
 <body>
   <canvas id="c"></canvas>
 
   <script>
+    /**
+     * Lombrigasound - Universal Default 1: Cosmos & Nebulosa Galáctica
+     * 
+     * Estilo: Galáxia espiral, campo estelar com profundidade 3D, nebulosa fluida e pulsar central.
+     * Paleta: Adaptativa baseada no gênero recebido ou padrão cósmico (Ciano, Magenta, Violeta, Branco).
+     */
+
     const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
 
@@ -24,29 +43,30 @@
     window.addEventListener('resize', resize);
     resize();
 
+    // 📡 Listener Obrigatório de postMessage
     let isPlaying = true;
     let genre = 'default';
+    let audioData = null;
 
-    // Gera uma paleta baseada no hash do nome do gênero
-    function getHashColor(str) {
+    // Gerador de cores harmônicas baseado em hash para qualquer rota
+    function getHashTheme(str) {
       let hash = 0;
       for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
       const h = Math.abs(hash) % 360;
       return {
-        primary: `hsl(${h}, 85%, 55%)`,
-        secondary: `hsl(${(h + 40) % 360}, 90%, 60%)`
+        primary: `hsl(${h}, 90%, 60%)`,
+        secondary: `hsl(${(h + 60) % 360}, 95%, 65%)`,
+        glow: `hsl(${(h + 120) % 360}, 85%, 55%)`
       };
     }
 
-    const KNOWN_THEMES = {
-      default:   { primary: '#ff6b00', secondary: '#00f0ff', speed: 0.05 },
-      synthwave: { primary: '#ff007f', secondary: '#00f0ff', speed: 0.06 },
-      rock:      { primary: '#ff2a00', secondary: '#ff9900', speed: 0.08 },
-      gospel:    { primary: '#fbbf24', secondary: '#ffffff', speed: 0.035 },
-      country:   { primary: '#d97706', secondary: '#f59e0b', speed: 0.04 },
-      flashback: { primary: '#a855f7', secondary: '#06b6d4', speed: 0.05 },
-      lofi:      { primary: '#a78bfa', secondary: '#f472b6', speed: 0.03 },
-      jazz:      { primary: '#3b82f6', secondary: '#f59e0b', speed: 0.035 }
+    const THEMES = {
+      default:   { primary: '#38bdf8', secondary: '#c084fc', glow: '#f472b6' },
+      synthwave: { primary: '#ff007f', secondary: '#00f0ff', glow: '#7928ca' },
+      rock:      { primary: '#ff2a00', secondary: '#ff9900', glow: '#ff0055' },
+      gospel:    { primary: '#fbbf24', secondary: '#ffffff', glow: '#f59e0b' },
+      country:   { primary: '#d97706', secondary: '#fde047', glow: '#ea580c' },
+      news:      { primary: '#ef4444', secondary: '#06b6d4', glow: '#3b82f6' }
     };
 
     window.addEventListener('message', (e) => {
@@ -58,53 +78,183 @@
       if (rawGenre && typeof rawGenre === 'string') {
         genre = rawGenre.toLowerCase().trim();
       }
+      if (e.data.audioData && Array.isArray(e.data.audioData)) {
+        audioData = e.data.audioData;
+      }
+    });
+
+    // 🌌 Campo Estelar 3D com Profundidade (Starfield)
+    const NUM_STARS = 120;
+    const stars = Array.from({ length: NUM_STARS }, () => ({
+      x: (Math.random() - 0.5) * 2000,
+      y: (Math.random() - 0.5) * 2000,
+      z: Math.random() * 1000 + 100,
+      size: Math.random() * 1.5 + 0.8
+    }));
+
+    // Partículas da Espiral Galáctica
+    const NUM_GALAXY_POINTS = 90;
+    const galaxyPoints = Array.from({ length: NUM_GALAXY_POINTS }, (_, i) => {
+      const arm = i % 3; // Galáxia de 3 braços espirais
+      const dist = (i / NUM_GALAXY_POINTS);
+      const angle = (arm * (Math.PI * 2 / 3)) + dist * Math.PI * 3.5;
+      return {
+        dist,
+        baseAngle: angle,
+        wobble: Math.random() * 0.15,
+        size: Math.random() * 2.2 + 1,
+        alpha: Math.random() * 0.5 + 0.4
+      };
     });
 
     let t = 0;
-    const NUM_BARS = 32;
 
     function render() {
-      const theme = KNOWN_THEMES[genre] || { ...getHashColor(genre), speed: 0.05 };
-
-      ctx.fillStyle = 'rgba(7, 8, 12, 0.3)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      if (isPlaying) t += theme.speed;
-
       const w = canvas.width;
       const h = canvas.height;
-      const centerX = w / 2;
-      const centerY = h / 2;
+      const cx = w / 2;
+      const cy = h / 2;
+      const minDim = Math.min(w, h);
+      const maxGalaxyRadius = minDim * 0.42;
 
-      // Barras simétricas de espectro sonoro sintetizado
-      const barWidth = (w * 0.7) / NUM_BARS;
-      const startX = (w - (NUM_BARS * barWidth)) / 2;
+      const theme = THEMES[genre] || getHashTheme(genre);
 
-      for (let i = 0; i < NUM_BARS; i++) {
-        const offset = Math.abs(i - NUM_BARS / 2);
-        const wave = Math.sin(t + i * 0.25) * Math.cos(t * 0.5 + i * 0.1);
-        const heightMultiplier = Math.max(0.1, Math.abs(wave));
-        const barHeight = heightMultiplier * (h * 0.35) * (isPlaying ? 1 : 0.15);
+      // 1. Limpeza com persistência cósmica
+      ctx.fillStyle = 'rgba(2, 3, 8, 0.22)';
+      ctx.fillRect(0, 0, w, h);
 
-        const x = startX + i * barWidth;
-        const grad = ctx.createLinearGradient(0, centerY - barHeight, 0, centerY + barHeight);
-        grad.addColorStop(0, theme.secondary);
-        grad.addColorStop(0.5, theme.primary);
-        grad.addColorStop(1, theme.secondary);
-
-        ctx.fillStyle = grad;
-        ctx.fillRect(x, centerY - barHeight / 2, barWidth - 3, barHeight);
+      if (isPlaying) {
+        t += 0.016; // Ritmo lento e contemplativo
       }
 
-      // Brilho central
-      const pulseRadius = 20 + Math.sin(t * 1.5) * 8;
-      ctx.fillStyle = theme.primary;
+      ctx.save();
+
+      // 2. Starfield 3D em Movimento Contínuo
+      stars.forEach(star => {
+        if (isPlaying) {
+          star.z -= 1.8;
+          if (star.z <= 0) {
+            star.z = 1000;
+            star.x = (Math.random() - 0.5) * 2000;
+            star.y = (Math.random() - 0.5) * 2000;
+          }
+        }
+
+        const k = 400 / star.z;
+        const sx = cx + star.x * k;
+        const sy = cy + star.y * k;
+
+        if (sx >= 0 && sx <= w && sy >= 0 && sy <= h) {
+          const starAlpha = Math.min(1, (1 - star.z / 1000) * 0.85);
+          ctx.fillStyle = `rgba(255, 255, 255, ${starAlpha})`;
+          ctx.beginPath();
+          ctx.arc(sx, sy, Math.max(0.6, star.size * k * 0.8), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // 3. Nebulosa Galáctica com Modos de Mesclagem
+      ctx.globalCompositeOperation = 'screen';
+
+      const nebulaPulse = isPlaying ? (1 + Math.sin(t * 1.5) * 0.08) : 1;
+      const gradNebula = ctx.createRadialGradient(cx, cy, 10, cx, cy, maxGalaxyRadius * 1.3 * nebulaPulse);
+      gradNebula.addColorStop(0, 'rgba(255, 255, 255, 0.7)');
+      gradNebula.addColorStop(0.2, theme.primary);
+      gradNebula.addColorStop(0.5, theme.secondary);
+      gradNebula.addColorStop(0.8, theme.glow);
+      gradNebula.addColorStop(1, 'rgba(2, 3, 8, 0)');
+
+      ctx.fillStyle = gradNebula;
       ctx.beginPath();
-      ctx.arc(centerX, centerY, isPlaying ? pulseRadius : 10, 0, Math.PI * 2);
+      ctx.arc(cx, cy, maxGalaxyRadius * 1.3 * nebulaPulse, 0, Math.PI * 2);
       ctx.fill();
+
+      // 4. Braços Espirais da Galáxia
+      const rot = t * 0.25;
+      galaxyPoints.forEach((pt, idx) => {
+        const currentAngle = pt.baseAngle + rot;
+        const wave = isPlaying ? Math.sin(t * 3 + idx * 0.2) * 12 : 0;
+        const r = (pt.dist * maxGalaxyRadius) + wave;
+
+        const px = cx + Math.cos(currentAngle) * r;
+        const py = cy + Math.sin(currentAngle) * r;
+
+        const color = idx % 2 === 0 ? theme.primary : theme.secondary;
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(px, py, pt.size * (1 + (isPlaying ? Math.sin(t * 2 + idx) * 0.3 : 0)), 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 5. Anéis de Ondas Harmônicas Cósmicas (Pulsares)
+      const numRings = 3;
+      for (let r = 1; r <= numRings; r++) {
+        const ringRad = maxGalaxyRadius * (0.3 + r * 0.22) * nebulaPulse;
+        const ringAlpha = (0.4 - r * 0.08) * (isPlaying ? 1 : 0.4);
+        
+        ctx.strokeStyle = r % 2 === 0 ? theme.primary : theme.secondary;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+
+        const points = 72;
+        for (let i = 0; i <= points; i++) {
+          const theta = (i / points) * Math.PI * 2;
+          const harmonic = isPlaying ? Math.sin(theta * (6 + r * 2) + t * (r % 2 === 0 ? 2 : -2)) * 8 : 1;
+          const rad = ringRad + harmonic;
+          const rx = cx + Math.cos(theta) * rad;
+          const ry = cy + Math.sin(theta) * rad;
+
+          if (i === 0) ctx.moveTo(rx, ry);
+          else ctx.lineTo(rx, ry);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      // 6. Núcleo Pulsar Radiante Central
+      const coreSize = 28 * nebulaPulse;
+      const gradCore = ctx.createRadialGradient(cx, cy, 2, cx, cy, coreSize * 2.2);
+      gradCore.addColorStop(0, '#ffffff');
+      gradCore.addColorStop(0.3, theme.primary);
+      gradCore.addColorStop(0.7, theme.glow);
+      gradCore.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.fillStyle = gradCore;
+      ctx.beginPath();
+      ctx.arc(cx, cy, coreSize * 2.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Feixes em Cruz do Pulsar
+      const flareLen = maxGalaxyRadius * 0.95;
+      const flareGrad = ctx.createLinearGradient(cx - flareLen, cy, cx + flareLen, cy);
+      flareGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      flareGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.9)');
+      flareGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      ctx.strokeStyle = flareGrad;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(cx - flareLen, cy);
+      ctx.lineTo(cx + flareLen, cy);
+      ctx.stroke();
+
+      const flareGradV = ctx.createLinearGradient(cx, cy - flareLen, cx, cy + flareLen);
+      flareGradV.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      flareGradV.addColorStop(0.5, 'rgba(255, 255, 255, 0.9)');
+      flareGradV.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+      ctx.strokeStyle = flareGradV;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - flareLen);
+      ctx.lineTo(cx, cy + flareLen);
+      ctx.stroke();
+
+      ctx.restore();
 
       requestAnimationFrame(render);
     }
+
     render();
   </script>
 </body>

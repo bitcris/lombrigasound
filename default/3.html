@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Universal 3 (Osciloscópio CRT & Winamp Vintage)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #020508;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', monospace;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    /**
+     * Lombrigasound - Universal Default 3: Osciloscópio CRT & Winamp Vintage
+     * 
+     * Estilo: Inspirado em tocadores clássicos retrô (Winamp, tubos de raio catódico CRT, curvas Lissajous e barras VU).
+     * Paleta: Fósforo verde/ciano (#22c55e, #06b6d4), Âmbar retrô (#f59e0b), Fundo de tubo escuro (#03080e).
+     */
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 📡 Listener Obrigatório de postMessage
+    let isPlaying = true;
+    let genre = 'default';
+    let audioData = null;
+
+    function getHashTheme(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+      const h = Math.abs(hash) % 360;
+      return {
+        primary: `hsl(${h}, 90%, 55%)`,
+        secondary: `hsl(${(h + 50) % 360}, 95%, 60%)`,
+        glow: `hsl(${(h + 100) % 360}, 85%, 50%)`
+      };
+    }
+
+    const THEMES = {
+      default:   { primary: '#22c55e', secondary: '#06b6d4', glow: '#10b981' },
+      synthwave: { primary: '#ff007f', secondary: '#00f0ff', glow: '#c084fc' },
+      rock:      { primary: '#ff2a00', secondary: '#f59e0b', glow: '#dc2626' },
+      gospel:    { primary: '#fbbf24', secondary: '#ffffff', glow: '#f59e0b' },
+      country:   { primary: '#d97706', secondary: '#fde047', glow: '#ea580c' },
+      news:      { primary: '#ef4444', secondary: '#38bdf8', glow: '#3b82f6' }
+    };
+
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+
+      const rawGenre = e.data.genre || e.data.genere;
+      if (rawGenre && typeof rawGenre === 'string') {
+        genre = rawGenre.toLowerCase().trim();
+      }
+      if (e.data.audioData && Array.isArray(e.data.audioData)) {
+        audioData = e.data.audioData;
+      }
+    });
+
+    // Picos de equalizador para o efeito Peak Hold
+    const NUM_EQ_BARS = 36;
+    const peakHolds = Array(NUM_EQ_BARS).fill(0);
+
+    let t = 0;
+
+    function render() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h * 0.44;
+      const minDim = Math.min(w, h);
+
+      const theme = THEMES[genre] || getHashTheme(genre);
+
+      // 1. Limpeza com persistência de fósforo CRT (phosphor decay)
+      ctx.fillStyle = 'rgba(2, 5, 10, 0.24)';
+      ctx.fillRect(0, 0, w, h);
+
+      if (isPlaying) {
+        t += 0.018; // Ritmo lento e suave
+      }
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+
+      // 2. Curvas Lissajous do Osciloscópio (Tubo de Raio Catódico)
+      const lissPoints = 240;
+      const lissRadius = minDim * 0.32;
+
+      ctx.strokeStyle = theme.primary;
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+
+      for (let i = 0; i <= lissPoints; i++) {
+        const theta = (i / lissPoints) * Math.PI * 2;
+        // Fórmulas harmônicas de osciloscópio clássico
+        const freqA = 3;
+        const freqB = 4;
+        const delta = t * 1.5;
+
+        const waveX = Math.sin(theta * freqA + delta) * (isPlaying ? 1 : 0.4);
+        const waveY = Math.sin(theta * freqB) * (isPlaying ? 1 : 0.4);
+        const ripple = isPlaying ? Math.sin(theta * 12 + t * 4) * 0.08 : 0;
+
+        const x = cx + waveX * (lissRadius + ripple * lissRadius);
+        const y = cy + waveY * (lissRadius * 0.85 + ripple * lissRadius);
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Feixe de ressonância secundário (onda espelhada)
+      ctx.strokeStyle = theme.secondary;
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      for (let i = 0; i <= lissPoints; i++) {
+        const theta = (i / lissPoints) * Math.PI * 2;
+        const waveX = Math.cos(theta * 2 - t * 1.2) * (isPlaying ? 0.75 : 0.3);
+        const waveY = Math.sin(theta * 3 + t * 2) * (isPlaying ? 0.75 : 0.3);
+
+        const x = cx + waveX * lissRadius;
+        const y = cy + waveY * lissRadius;
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // 3. Analisador de Espectro Estilo Winamp (LED Bars com Peak Hold)
+      const barAreaW = Math.min(w * 0.85, 680);
+      const startX = cx - barAreaW / 2;
+      const barW = barAreaW / NUM_EQ_BARS;
+      const maxBarH = h * 0.22;
+      const baseY = h * 0.90;
+
+      for (let i = 0; i < NUM_EQ_BARS; i++) {
+        const bx = startX + i * barW;
+        const distFromMid = 1 - Math.abs(i - NUM_EQ_BARS / 2) / (NUM_EQ_BARS / 2);
+        
+        const wave1 = Math.sin(t * 3 + i * 0.35) * 0.5 + 0.5;
+        const wave2 = Math.cos(t * 4.5 - i * 0.4) * 0.3 + 0.3;
+        const currentH = isPlaying ? ((wave1 * 0.6 + wave2 * 0.4) * distFromMid * maxBarH) : (maxBarH * 0.05);
+
+        // Atualizar pico
+        if (currentH > peakHolds[i]) {
+          peakHolds[i] = currentH;
+        } else {
+          peakHolds[i] = Math.max(0, peakHolds[i] - 1.2); // queda lenta do pico
+        }
+
+        // Desenhar barra de gradiente
+        const grad = ctx.createLinearGradient(0, baseY - currentH, 0, baseY);
+        grad.addColorStop(0, theme.primary);
+        grad.addColorStop(0.6, theme.secondary);
+        grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = grad;
+        ctx.fillRect(bx + 2, baseY - currentH, barW - 4, currentH);
+
+        // Desenhar indicador de pico (Peak Hold Line)
+        if (peakHolds[i] > 4) {
+          ctx.fillStyle = '#ffffff';
+          ctx.fillRect(bx + 2, baseY - peakHolds[i] - 2, barW - 4, 2);
+        }
+      }
+
+      ctx.restore();
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>
