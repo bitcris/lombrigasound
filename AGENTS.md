@@ -11,6 +11,7 @@ O **Lombrigasound** é uma plataforma de visualizadores de áudio dinâmicos, re
 - **URL de Produção**: `https://lombrigasound.pages.dev`
 - **Hub Central de Preview**: `https://lombrigasound.pages.dev/`
 - **Rotas Dinâmicas de Gêneros**:
+  - 📰 News: `/news` (sorteia variações como `/news/1.html`, `/news/2.html`)
   - 🎸 Rock: `/rock` (sorteia variações como `/rock/1.html`, `/rock/2.html`)
   - ✨ Gospel: `/gospel`
   - 🤠 Country: `/country`
@@ -155,6 +156,10 @@ lombrigasound/
 ├── exemplo.html          # Template padrão e canônico de visualizador
 ├── wrangler.toml         # Configurações do projeto Cloudflare
 ├── AGENTS.md             # Este manual de diretrizes para agentes
+├── news/                 # Visualizadores de estilo Notícias / Transmissão / Telejornal
+│   ├── 1.html
+│   ├── 2.html
+│   └── index.html
 ├── country/              # Visualizadores de estilo Country / Acústico
 │   ├── 1.html
 │   ├── 2.html

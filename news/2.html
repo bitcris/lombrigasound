@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - News 2 (Redação 24H & Painel de Transmissão)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #020617;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    /**
+     * Lombrigasound - News 2: Redação 24H & Painel de Transmissão
+     * 
+     * Estética: Painel de controle de estúdio de notícias, osciloscópio estéreo, arcos de telemetria e satélites de comunicação.
+     * Paleta: Vermelho breaking news (#dc2626, #ef4444), Azul estúdio (#1e40af, #3b82f6), Branco neutro (#ffffff), Âmbar de alerta (#f59e0b).
+     */
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 📡 Listener Obrigatório de postMessage
+    let isPlaying = true;
+    let audioData = null;
+
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) {
+        isPlaying = Boolean(e.data.isPlaying);
+      } else if (e.data.playing !== undefined) {
+        isPlaying = Boolean(e.data.playing);
+      }
+      if (e.data.audioData && Array.isArray(e.data.audioData)) {
+        audioData = e.data.audioData;
+      }
+    });
+
+    let t = 0;
+
+    function render() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h * 0.46;
+      const maxRadius = Math.min(w, h) * 0.32;
+
+      // 1. Limpeza de fundo com persistência visual suave
+      ctx.fillStyle = 'rgba(2, 6, 23, 0.22)';
+      ctx.fillRect(0, 0, w, h);
+
+      if (isPlaying) {
+        t += 0.016; // Ritmo lento, elegante e hipnótico
+      }
+
+      ctx.save();
+
+      // 2. Fundo com Feixes de Estúdio em Perspectiva
+      ctx.globalCompositeOperation = 'screen';
+      const studioGlow = ctx.createRadialGradient(cx, cy, 20, cx, cy, maxRadius * 2);
+      studioGlow.addColorStop(0, 'rgba(30, 64, 175, 0.25)');
+      studioGlow.addColorStop(0.5, 'rgba(15, 23, 42, 0.1)');
+      studioGlow.addColorStop(1, 'rgba(2, 6, 23, 0)');
+
+      ctx.fillStyle = studioGlow;
+      ctx.fillRect(0, 0, w, h);
+
+      // 3. Arcos de Telemetria e Frequência de Notícias (Radar Circular)
+      const numArcs = 5;
+      for (let i = 0; i < numArcs; i++) {
+        const arcR = maxRadius * (0.45 + i * 0.16);
+        const arcAlpha = (0.45 - i * 0.06) * (isPlaying ? 1 : 0.4);
+        const speed = (i % 2 === 0 ? 0.3 : -0.25);
+        const rot = t * speed;
+
+        ctx.strokeStyle = i === 0 
+          ? `rgba(239, 68, 68, ${arcAlpha})` 
+          : i % 2 === 0 
+            ? `rgba(59, 130, 246, ${arcAlpha})` 
+            : `rgba(255, 255, 255, ${arcAlpha * 0.8})`;
+
+        ctx.lineWidth = i === 0 ? 2.5 : 1.5;
+
+        // Arcos segmentados
+        ctx.beginPath();
+        const startAng = rot + i * 1.2;
+        const endAng = startAng + Math.PI * (0.8 + (i % 3) * 0.3);
+        ctx.arc(cx, cy, arcR, startAng, endAng);
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(cx, cy, arcR, startAng + Math.PI, endAng + Math.PI);
+        ctx.stroke();
+      }
+
+      // 4. Osciloscópio de Transmissão de Áudio (Centro)
+      const points = 120;
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+
+      const waveWidth = Math.min(w * 0.75, 600);
+      const waveStartX = cx - waveWidth / 2;
+      const waveStep = waveWidth / points;
+
+      for (let i = 0; i <= points; i++) {
+        const x = waveStartX + i * waveStep;
+        const norm = (i / points) * 2 - 1; // -1 a +1
+        const envelope = Math.cos(norm * (Math.PI / 2)); // formato de sino
+
+        const freq1 = Math.sin(i * 0.15 + t * 4) * (isPlaying ? 24 : 3);
+        const freq2 = Math.cos(i * 0.35 - t * 6) * (isPlaying ? 14 : 1);
+        const freq3 = Math.sin(i * 0.6 + t * 2) * (isPlaying ? 8 : 0);
+        const y = cy + (freq1 + freq2 + freq3) * envelope;
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // Reflexo espelhado da onda em vermelho suave
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.45)';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      for (let i = 0; i <= points; i++) {
+        const x = waveStartX + i * waveStep;
+        const norm = (i / points) * 2 - 1;
+        const envelope = Math.cos(norm * (Math.PI / 2));
+        const freq1 = Math.sin(i * 0.15 + t * 4) * (isPlaying ? 24 : 3);
+        const y = cy - (freq1 * 0.7) * envelope;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      // 5. Medidores VU Analógicos nos Cantos Superiores
+      const drawVU = (vx, vy, label, val) => {
+        const vuRadius = 45;
+        ctx.strokeStyle = 'rgba(59, 130, 246, 0.4)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(vx, vy, vuRadius, Math.PI * 0.8, Math.PI * 2.2);
+        ctx.stroke();
+
+        // Ponteiro
+        const needleAngle = Math.PI * 0.8 + (val * Math.PI * 1.4);
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(vx, vy);
+        ctx.lineTo(vx + Math.cos(needleAngle) * (vuRadius - 6), vy + Math.sin(needleAngle) * (vuRadius - 6));
+        ctx.stroke();
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, vx, vy + vuRadius + 14);
+      };
+
+      if (w > 600) {
+        const vuValL = isPlaying ? (0.4 + Math.sin(t * 3.5) * 0.35) : 0.1;
+        const vuValR = isPlaying ? (0.45 + Math.cos(t * 4.2) * 0.35) : 0.1;
+        drawVU(w * 0.15, h * 0.22, 'CH-1 MASTER', Math.max(0, Math.min(1, vuValL)));
+        drawVU(w * 0.85, h * 0.22, 'CH-2 BROADCAST', Math.max(0, Math.min(1, vuValR)));
+      }
+
+      ctx.restore();
+
+      // 6. Tarja de Notícias de Última Hora (Breaking News Bar)
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
+      ctx.fillRect(0, h - 36, w, 36);
+
+      // Caixa Vermelha "BREAKING"
+      ctx.fillStyle = '#dc2626';
+      ctx.fillRect(0, h - 36, 140, 36);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 13px system-ui, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('⚡ PLANTÃO', 16, h - 13);
+
+      // Linha de dados ao vivo
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '12px monospace';
+      const ticker = "TRANSMISSÃO AO VIVO // SINAL DE ÁUDIO HD // FREQÜÊNCIA CENTRAL ESTÁVEL // SATÉLITE GEO-10 // BROADCAST 24/7";
+      const scrollPos = (t * 45) % (w + 700);
+      ctx.fillText(ticker, w - scrollPos, h - 14);
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>

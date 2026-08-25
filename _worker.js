@@ -17,6 +17,7 @@ export default {
 
     // 🎲 Pools de variações por gênero
     const GENRE_POOLS = {
+      '/news': ['/news/1.html', '/news/2.html'],
       '/gospel': ['/gospel/1.html', '/gospel/2.html', '/gospel/3.html'],
       '/rock': ['/rock/1.html', '/rock/2.html'],
       '/country': ['/country/1.html', '/country/2.html'],

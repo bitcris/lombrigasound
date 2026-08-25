@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - News 1 (Plantão Global & Globo Holográfico)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #030712;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, monospace;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    /**
+     * Lombrigasound - News 1: Plantão Global & Globo Holográfico
+     * 
+     * Estética: Telejornalismo, estúdio de transmissão, globo digital 3D e telemetria de áudio.
+     * Paleta: Azul marinho de redação (#0b1736, #1e3a8a), Vermelho ao vivo (#ef4444, #b91c1c), Ciano de telemetria (#06b6d4, #38bdf8), Branco puro (#ffffff).
+     */
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 📡 Listener Obrigatório de postMessage
+    let isPlaying = true;
+    let audioData = null;
+
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) {
+        isPlaying = Boolean(e.data.isPlaying);
+      } else if (e.data.playing !== undefined) {
+        isPlaying = Boolean(e.data.playing);
+      }
+      if (e.data.audioData && Array.isArray(e.data.audioData)) {
+        audioData = e.data.audioData;
+      }
+    });
+
+    // 🌐 Pontos do Globo 3D Holográfico (Latitude & Longitude)
+    const GLOBE_POINTS = [];
+    const NUM_LAT = 16;
+    const NUM_LON = 24;
+
+    for (let lat = 0; lat < NUM_LAT; lat++) {
+      const phi = ((lat + 1) / (NUM_LAT + 1)) * Math.PI - Math.PI / 2;
+      const cosPhi = Math.cos(phi);
+      const sinPhi = Math.sin(phi);
+      
+      for (let lon = 0; lon < NUM_LON; lon++) {
+        const theta = (lon / NUM_LON) * Math.PI * 2;
+        GLOBE_POINTS.push({
+          x: cosPhi * Math.cos(theta),
+          y: sinPhi,
+          z: cosPhi * Math.sin(theta),
+          baseAlpha: 0.3 + Math.random() * 0.4
+        });
+      }
+    }
+
+    // Partículas de satélite / dados em órbita
+    const SATELLITES = Array.from({ length: 8 }, (_, i) => ({
+      angle: (i / 8) * Math.PI * 2,
+      speed: 0.008 + (i % 3) * 0.004,
+      radiusOffset: (i % 2 === 0 ? 1.25 : 1.45),
+      size: 2.5
+    }));
+
+    let t = 0;
+
+    function render() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h * 0.46;
+      const globeRadius = Math.min(w, h) * 0.24;
+
+      // 1. Limpeza de fundo com rastro suave
+      ctx.fillStyle = 'rgba(3, 7, 18, 0.22)';
+      ctx.fillRect(0, 0, w, h);
+
+      if (isPlaying) {
+        t += 0.015; // Velocidade suave e hipnótica
+      }
+
+      ctx.save();
+
+      // 2. Grade de Fundo & Linhas de Estúdio
+      ctx.strokeStyle = 'rgba(30, 58, 138, 0.15)';
+      ctx.lineWidth = 1;
+      const gridSize = 45;
+      const offsetX = (t * 10) % gridSize;
+
+      for (let x = 0; x < w; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x + offsetX, 0);
+        ctx.lineTo(x + offsetX, h);
+        ctx.stroke();
+      }
+
+      // 3. Scanner Radar / Feixe de Transmissão Circular
+      ctx.globalCompositeOperation = 'screen';
+      const scanAngle = t * 0.8;
+      const scanRad = globeRadius * 1.55;
+
+      const scanGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, scanRad);
+      scanGrad.addColorStop(0, 'rgba(56, 189, 248, 0.15)');
+      scanGrad.addColorStop(0.6, 'rgba(30, 58, 138, 0.08)');
+      scanGrad.addColorStop(1, 'rgba(3, 7, 18, 0)');
+
+      ctx.fillStyle = scanGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, scanRad, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 4. Anéis Orbitais de Telemetria (Radar de Notícias)
+      for (let r = 1; r <= 3; r++) {
+        const ringR = globeRadius * (1 + r * 0.22);
+        const ringAlpha = (0.35 - r * 0.08) * (isPlaying ? 1 : 0.4);
+        
+        ctx.strokeStyle = r === 1 ? `rgba(239, 68, 68, ${ringAlpha})` : `rgba(56, 189, 248, ${ringAlpha})`;
+        ctx.lineWidth = r === 1 ? 1.8 : 1.2;
+        ctx.setLineDash(r % 2 === 0 ? [8, 8] : [4, 12]);
+        ctx.beginPath();
+        ctx.arc(cx, cy, ringR, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // 5. Globo 3D Holográfico com Rotação
+      const rotY = t * 0.4;
+      const cosRot = Math.cos(rotY);
+      const sinRot = Math.sin(rotY);
+      const rotX = 0.25; // leve inclinação do eixo terrestre
+      const cosX = Math.cos(rotX);
+      const sinX = Math.sin(rotX);
+
+      GLOBE_POINTS.forEach(pt => {
+        // Rotação em Y
+        const rx = pt.x * cosRot - pt.z * sinRot;
+        const rz = pt.x * sinRot + pt.z * cosRot;
+        
+        // Inclinação em X
+        const ry = pt.y * cosX - rz * sinX;
+        const finalZ = pt.y * sinX + rz * cosX;
+
+        // Projeção perspectiva
+        const scale = (finalZ + 2.2) / 3.2;
+        const px = cx + rx * globeRadius * (1 + (isPlaying ? Math.sin(t * 3 + pt.y * 4) * 0.03 : 0));
+        const py = cy + ry * globeRadius * (1 + (isPlaying ? Math.sin(t * 3 + pt.y * 4) * 0.03 : 0));
+
+        const alpha = Math.max(0.08, (finalZ + 1) * 0.5) * (isPlaying ? 1 : 0.5);
+        const isHotspot = (Math.abs(pt.x) > 0.6 && Math.abs(pt.y) < 0.3);
+
+        ctx.fillStyle = isHotspot 
+          ? `rgba(239, 68, 68, ${alpha * 1.2})` 
+          : `rgba(56, 189, 248, ${alpha * 0.9})`;
+
+        ctx.beginPath();
+        ctx.arc(px, py, Math.max(1, (isHotspot ? 2.5 : 1.8) * scale), 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 6. Satélites em Órbita Transmitindo Sinais
+      SATELLITES.forEach(sat => {
+        if (isPlaying) {
+          sat.angle += sat.speed;
+        }
+        const orbR = globeRadius * sat.radiusOffset;
+        const sx = cx + Math.cos(sat.angle) * orbR;
+        const sy = cy + Math.sin(sat.angle) * (orbR * 0.45); // elipse em perspectiva
+
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(sx, sy, sat.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sinal de rádio emitido pelo satélite
+        if (isPlaying) {
+          const pulseR = ((t * 20 + sat.angle * 10) % 18) + 2;
+          const pAlpha = 1 - (pulseR / 20);
+          ctx.strokeStyle = `rgba(239, 68, 68, ${pAlpha * 0.6})`;
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.arc(sx, sy, pulseR, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      });
+
+      // 7. Espectro de Áudio Estilo Console de Transmissão (Lower-Third Audio Bars)
+      const numBars = 48;
+      const barAreaW = Math.min(w * 0.88, 700);
+      const barStartX = cx - barAreaW / 2;
+      const barSpacing = barAreaW / numBars;
+      const barMaxH = h * 0.16;
+      const barBaseY = h * 0.86;
+
+      for (let i = 0; i < numBars; i++) {
+        const bx = barStartX + i * barSpacing;
+        const distFromMid = 1 - Math.abs(i - numBars / 2) / (numBars / 2);
+        
+        // Simulação de espectro dinâmico
+        const wave1 = Math.sin(t * 3 + i * 0.3) * 0.5 + 0.5;
+        const wave2 = Math.cos(t * 5 - i * 0.5) * 0.3 + 0.3;
+        const wave3 = Math.sin(t * 1.5 + i * 0.15) * 0.2 + 0.2;
+        const rawHeight = isPlaying ? ((wave1 * 0.5 + wave2 * 0.3 + wave3 * 0.2) * distFromMid) : 0.08;
+        const barHeight = Math.max(4, rawHeight * barMaxH);
+
+        // Segmentos digitais LED
+        const numSegments = 12;
+        const segH = barHeight / numSegments;
+
+        for (let s = 0; s < numSegments; s++) {
+          const sy = barBaseY - (s + 1) * (barMaxH / numSegments);
+          if (sy < barBaseY - barHeight) continue;
+
+          // Cores: Verde/Ciano na base, Amarelo no meio, Vermelho no pico
+          let segColor = '#06b6d4';
+          if (s >= 9) segColor = '#ef4444';
+          else if (s >= 6) segColor = '#f59e0b';
+
+          ctx.fillStyle = segColor;
+          ctx.fillRect(bx + 1, sy, barSpacing - 3, (barMaxH / numSegments) - 2);
+        }
+      }
+
+      // 8. Tarja de Telejornalismo (Live Broadcast HUD)
+      ctx.restore();
+      
+      // Barra Inferior de Transmissão
+      ctx.fillStyle = 'rgba(11, 23, 54, 0.85)';
+      ctx.fillRect(0, h - 34, w, 34);
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(0, h - 34, 120, 34);
+
+      // Texto "AO VIVO / LIVE"
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 13px system-ui, sans-serif';
+      ctx.fillText('🔴 AO VIVO', 18, h - 12);
+
+      // Ticker de Notícias com Rolagem
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '12px monospace';
+      const tickerText = "LOMBRIGASOUND NEWS // FREQUÊNCIA DE ÁUDIO GLOBAL // TRANSMISSÃO 24H // REDE MUNDIAL DE VISUALIZADORES // 108.4 MHz // 60 FPS BROADCAST";
+      const textOffset = (t * 50) % (w + 800);
+      ctx.fillText(tickerText, w - textOffset, h - 13);
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>
