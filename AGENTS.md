@@ -187,25 +187,28 @@ lombrigasound/
 
 ---
 
-## 7. 🎨 Diretrizes de Estética Visual: Diversidade, Estilos Randômicos e Ritmo
+## 7. 🎨 Diretrizes de Estética Visual: Identidade Própria, Harmonia e Elementos Criativos
 
-Os visualizadores **NÃO** precisam e **NÃO** devem seguir sempre a mesma estética, as mesmas cores ou os mesmos padrões geométricos. Ao criar novos visualizadores ou variações, explore conceitos visuais variados, ricos e aleatórios.
+Cada visualizador deve ser uma experiência audiovisual imersiva e memorável. As referências visuais (como Winamp, PS2, etc.) servem como **inspirações conceituais**, mas os visualizadores **NÃO devem se limitar exclusivamente a elas nem imitá-las de forma rígida**. Cada criação deve possuir **estilo próprio, autenticidade e acabamento refinado**.
 
-### 7.1. Exploração de Estilos e Conceitos Visuais
-Ao conceber um visualizador, utilize ou combine estilos visuais criativos como:
-- 📻 **Estilo Winamp / Classic Media Player**: Analisadores de espectro em barras de LED/gradiente, osciloscópios vintage de tubo de raio catódico (CRT), medidores VU analógicos, visualizações de onda estilo Milkdrop.
-- 🎮 **Estilo PS2 / Console Retrô**: Pilares e colunas de dados translúcidas flutuando em névoa cósmica escura, orbes em órbita suave, partículas místicas inspiradas na clássica tela de som e boot do PlayStation 2.
-- 🌌 **Estilo Galáxia / Cosmos / Nebulosa**: Espirais galácticas, campos de estrelas com profundidade (starfield), nébulas translúcidas geradas por gradientes, pulsares radiantes e auroras boreais.
-- ✨ **Estilo Moderno / Minimalista**: Formas geométricas limpas, malhas vetoriais elegantes, gradientes contínuos, arcos e fitas de luz sofisticadas.
-- 🕹️ **Outros Estilos (Cyberpunk, Demoscene, Sintetizador Analógico, Fluidos)**: Wireframes tridimensionais em Canvas 2D, fitas de luz de fluidos, lasers ou grades sintetizadas.
+### 7.1. Fundo Preto e Contraste Imersivo
+- **Preferência por Fundo Preto Profundo**: Utilize sempre fundos pretos ou quase pretos (ex: `#000000`, `#020307`, `#03050c`).
+- O fundo escuro garante contraste cinematográfico, realçando emissões de luz, partículas e gradientes sem ofuscar os elementos centrais.
 
-### 7.2. Ritmo e Velocidade da Animação
-- **Velocidade Média Mais Lenta e Hipnótica**: Mantenha a velocidade média das animações em ritmo **mais suave e lento** (ex: incrementos de tempo `t` reduzidos, rotações e pulsações lentas e contemplativas).
-- Evite acelerações bruscas ou movimentos excessivamente frenéticos, priorizando fluidez estética e sensação imersiva a 60 FPS.
+### 7.2. Liberdade de Cores e Formas com Organização Visual
+- **Liberdade Criativa Total**: Sinta-se livre para explorar paletas de cores vibrantes, contrastes quentes/frios, formas geométricas, malhas vetoriais e curvas fluidas.
+- **Harmonia e Clareza (Não Poluído/Confuso)**: A composição deve ser **organizada, limpa e balanceada**, evitando sobreposições caóticas ou excesso de ruído que tornem a tela confusa.
+- Mantenha uma hierarquia visual clara: um ponto focal dominante (núcleo, forma de onda principal ou estrutura central), complementado por elementos de atmosfera (partículas, halos e profundidade de fundo).
 
-### 7.3. Técnicas e Efeitos Recomendados
-- **Trilhas e Rastros Suaves**: Uso de `ctx.fillStyle = 'rgba(..., 0.15 a 0.25)'` antes de redesenhar para dar efeito orgânico de motion blur / persistência visual.
-- **Modos de Mesclagem de Luz**: `ctx.globalCompositeOperation = 'screen'` ou `'lighter'` para criar realces brilhantes, halos e feixes iluminados.
-- **Gradientes Suaves**: Uso equilibrado de `createLinearGradient` e `createRadialGradient` para iluminação volumétrica.
-- **Congelamento Eficiente no Pause**: Quando `isPlaying === false`, nenhum avanço de tempo (`t`) deve ocorrer, mantendo a animação congelada suavemente e poupando CPU/GPU.
+### 7.3. Elementos Visuais Recomendados e Criativos
+Ao criar novos visualizadores, explore e combine elementos como:
+- 🌌 **Cosmos, Estrelas e Nebulosas**: Campos estelares com profundidade 3D (*starfield* parallax), poeira cósmica cintilante, pulsares radiantes, braços de galáxias e nébulas translúcidas.
+- 💡 **Efeitos de Iluminação e Brilho**: Halos volumétricos, feixes de luz (*God rays*), auras em modo de mesclagem (`ctx.globalCompositeOperation = 'screen'` ou `'lighter'`), reflexos ópticos e gradientes com brilho suave.
+- ⚡ **Tecnologia e Futurismo**: Hologramas vetoriais, anéis de telemetria orbital, osciloscópios de precisão, malhas wireframe tridimensionais, feixes de laser e grades de dados futuristas.
+- 🌊 **Fitas de Luz, Fluidos e Geometria**: Fitas ópticas fluidas (aurora boreal), ondas harmônicas em curvas de Bézier, mandalas geométricas e visualizadores de frequência minimalistas.
+
+### 7.4. Ritmo e Velocidade da Animação
+- **Velocidade Média Mais Lenta e Hipnótica**: Priorize movimentos suaves, cadenciados e relaxantes (incrementos de tempo `t` reduzidos), permitindo ao espectador contemplar a fluidez e a geometria a 60 FPS.
+- **Congelamento Suave no Pause**: Quando `isPlaying === false`, nenhum avanço de tempo (`t`) deve ocorrer, mantendo o estado visual congelado de forma elegante e poupando ciclos de CPU/GPU.
+
 
