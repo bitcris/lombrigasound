@@ -178,16 +178,25 @@ lombrigasound/
 
 ---
 
-## 7. 💡 Dicas de Estética Visual para o Canvas
+## 7. 🎨 Diretrizes de Estética Visual: Diversidade, Estilos Randômicos e Ritmo
 
-- **Paletas de Cores por Gênero**:
-  - **Synthwave**: Magenta (`#ff007f`), Ciano (`#00f0ff`), Roxo escuro (`#1a0033`).
-  - **Rock**: Vermelho lava (`#ff2200`), Laranja brasa (`#ff9900`), Preto carvão (`#060608`).
-  - **Gospel**: Dourado divino (`#fbbf24`), Branco luz (`#ffffff`), Âmbar suave (`#f59e0b`).
-  - **Country**: Marrom âmbar (`#d97706`), Bege acústico (`#fef3c7`), Pôr do sol (`#ea580c`).
-  - **Lo-Fi**: Lavanda pastel (`#a78bfa`), Rosa vintage (`#f472b6`), Azul suave (`#60a5fa`).
-  - **EDM / Cyberpunk**: Verde neon (`#39ff14`), Azul elétrico (`#00d4ff`), Ultra-violeta (`#7928ca`).
-- **Efeitos Recomendados**:
-  - Trilhas suaves com `ctx.fillStyle = 'rgba(0, 0, 0, 0.2)'` antes de redesenhar para dar efeito de rastro / motion blur.
-  - Gradientes radiais e lineares (`ctx.createRadialGradient`, `ctx.createLinearGradient`).
-  - Formas geométricas pulsantes que reagem a funções senoidais (`Math.sin(t * velocidade)`).
+Os visualizadores **NÃO** precisam e **NÃO** devem seguir sempre a mesma estética, as mesmas cores ou os mesmos padrões geométricos. Ao criar novos visualizadores ou variações, explore conceitos visuais variados, ricos e aleatórios.
+
+### 7.1. Exploração de Estilos e Conceitos Visuais
+Ao conceber um visualizador, utilize ou combine estilos visuais criativos como:
+- 📻 **Estilo Winamp / Classic Media Player**: Analisadores de espectro em barras de LED/gradiente, osciloscópios vintage de tubo de raio catódico (CRT), medidores VU analógicos, visualizações de onda estilo Milkdrop.
+- 🎮 **Estilo PS2 / Console Retrô**: Pilares e colunas de dados translúcidas flutuando em névoa cósmica escura, orbes em órbita suave, partículas místicas inspiradas na clássica tela de som e boot do PlayStation 2.
+- 🌌 **Estilo Galáxia / Cosmos / Nebulosa**: Espirais galácticas, campos de estrelas com profundidade (starfield), nébulas translúcidas geradas por gradientes, pulsares radiantes e auroras boreais.
+- ✨ **Estilo Moderno / Minimalista**: Formas geométricas limpas, malhas vetoriais elegantes, gradientes contínuos, arcos e fitas de luz sofisticadas.
+- 🕹️ **Outros Estilos (Cyberpunk, Demoscene, Sintetizador Analógico, Fluidos)**: Wireframes tridimensionais em Canvas 2D, fitas de luz de fluidos, lasers ou grades sintetizadas.
+
+### 7.2. Ritmo e Velocidade da Animação
+- **Velocidade Média Mais Lenta e Hipnótica**: Mantenha a velocidade média das animações em ritmo **mais suave e lento** (ex: incrementos de tempo `t` reduzidos, rotações e pulsações lentas e contemplativas).
+- Evite acelerações bruscas ou movimentos excessivamente frenéticos, priorizando fluidez estética e sensação imersiva a 60 FPS.
+
+### 7.3. Técnicas e Efeitos Recomendados
+- **Trilhas e Rastros Suaves**: Uso de `ctx.fillStyle = 'rgba(..., 0.15 a 0.25)'` antes de redesenhar para dar efeito orgânico de motion blur / persistência visual.
+- **Modos de Mesclagem de Luz**: `ctx.globalCompositeOperation = 'screen'` ou `'lighter'` para criar realces brilhantes, halos e feixes iluminados.
+- **Gradientes Suaves**: Uso equilibrado de `createLinearGradient` e `createRadialGradient` para iluminação volumétrica.
+- **Congelamento Eficiente no Pause**: Quando `isPlaying === false`, nenhum avanço de tempo (`t`) deve ocorrer, mantendo a animação congelada suavemente e poupando CPU/GPU.
+
