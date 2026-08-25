@@ -14,7 +14,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 2.5rem 1rem;
+      padding: 2.5rem 1rem 4rem 1rem;
     }
     header {
       text-align: center;
@@ -134,6 +134,138 @@
     .route-card a:hover {
       text-decoration: underline;
     }
+
+    /* 📖 Seção de Documentação */
+    .docs-section {
+      margin-top: 3.5rem;
+      width: 100%;
+      max-width: 820px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+    .docs-header {
+      text-align: left;
+      border-bottom: 1px solid #232738;
+      padding-bottom: 1rem;
+    }
+    .docs-header h2 {
+      font-size: 1.6rem;
+      color: #f8fafc;
+      margin-bottom: 0.4rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .docs-header p {
+      max-width: 100%;
+      color: #94a3b8;
+      font-size: 0.95rem;
+    }
+    .docs-card {
+      background: #131520;
+      border: 1px solid #232738;
+      border-radius: 10px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    .docs-card h3 {
+      font-size: 1.15rem;
+      color: #38bdf8;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .docs-card p {
+      font-size: 0.92rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+    }
+    .code-container {
+      position: relative;
+      background: #090a12;
+      border: 1px solid #20263c;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .code-header {
+      background: #0e111c;
+      padding: 0.4rem 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #20263c;
+    }
+    .code-lang {
+      font-size: 0.75rem;
+      color: #64748b;
+      font-family: monospace;
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .btn-copy {
+      background: #1e2438;
+      border: 1px solid #334155;
+      color: #cbd5e1;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-copy:hover {
+      background: #2b354f;
+      color: #fff;
+    }
+    pre {
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: 'Consolas', 'Fira Code', monospace;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: #e2e8f0;
+      margin: 0;
+    }
+    code {
+      font-family: inherit;
+    }
+    .table-container {
+      overflow-x: auto;
+      border: 1px solid #20263c;
+      border-radius: 8px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      text-align: left;
+    }
+    th {
+      background: #0e111c;
+      color: #94a3b8;
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #20263c;
+    }
+    td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid #181d2e;
+      color: #cbd5e1;
+    }
+    tr:last-child td {
+      border-bottom: none;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.8rem;
+      background: #1e293b;
+      color: #38bdf8;
+    }
   </style>
 </head>
 <body>
@@ -196,6 +328,118 @@
     </div>
   </div>
 
+  <!-- 📖 Seção de Documentação para Desenvolvedores -->
+  <section class="docs-section">
+    <div class="docs-header">
+      <h2>📦 Como Usar o Lombrigasound no seu Projeto</h2>
+      <p>O Lombrigasound foi projetado para ser integrado de forma rápida e modular em qualquer website, aplicativo web ou player de áudio (React, Vue, Svelte, Next.js ou HTML puro).</p>
+    </div>
+
+    <!-- Card 1: Incorporação Simples -->
+    <div class="docs-card">
+      <h3>1. 🚀 Incorporação Básica com &lt;iframe&gt;</h3>
+      <p>Insira a tag <code>&lt;iframe&gt;</code> apontando para o endpoint do gênero desejado. O Cloudflare Worker entregará automaticamente uma variação visual sorteada e otimizada a 60 FPS:</p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-lang">HTML</span>
+          <button class="btn-copy" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code>&lt;!-- Incorporando o visualizador de Synthwave --&gt;
+&lt;iframe 
+  id="lombriga-visualizer"
+  src="https://lombrigasound.pages.dev/synthwave" 
+  width="100%" 
+  height="400" 
+  style="border: none; background: #000; border-radius: 8px;"
+  allow="autoplay"&gt;
+&lt;/iframe&gt;</code></pre>
+      </div>
+    </div>
+
+    <!-- Card 2: Controle com postMessage -->
+    <div class="docs-card">
+      <h3>2. 🎛️ Controle de Play / Pause com JavaScript (postMessage)</h3>
+      <p>Você pode controlar a animação e o estado de reprodução em tempo real enviando mensagens via <code>postMessage</code> para o <code>contentWindow</code> do iframe:</p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span class="code-lang">JavaScript</span>
+          <button class="btn-copy" onclick="copyCode(this)">Copiar</button>
+        </div>
+        <pre><code>const iframe = document.getElementById('lombriga-visualizer');
+
+// Exemplo: Conectando com uma tag &lt;audio&gt; nativa
+const audioPlayer = document.querySelector('audio');
+
+// Quando a música começar a tocar
+audioPlayer.addEventListener('play', () => {
+  iframe.contentWindow.postMessage({ isPlaying: true }, '*');
+});
+
+// Quando a música for pausada (congela a animação suavemente)
+audioPlayer.addEventListener('pause', () => {
+  iframe.contentWindow.postMessage({ isPlaying: false }, '*');
+});
+
+// Alternar gênero musical dinamicamente
+function changeGenre(newGenre) {
+  iframe.contentWindow.postMessage({ genre: newGenre }, '*');
+}</code></pre>
+      </div>
+    </div>
+
+    <!-- Card 3: Tabela de Rotas Disponíveis -->
+    <div class="docs-card">
+      <h3>3. 🌐 Endpoints e Rotas Disponíveis</h3>
+      <p>Todas as rotas possuem suporte a sorteio randômico de variações, cabeçalhos de iframe liberados (<code>frame-ancestors *</code>) e CORS global habilitado:</p>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Gênero / Rota</th>
+              <th>Endpoint Completo</th>
+              <th>Estilo Visual</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge">/news</span></td>
+              <td><code>https://lombrigasound.pages.dev/news</code></td>
+              <td>Globo 3D holográfico, satélites, VU meters e telemetria</td>
+            </tr>
+            <tr>
+              <td><span class="badge">/rock</span></td>
+              <td><code>https://lombrigasound.pages.dev/rock</code></td>
+              <td>Equalizador elétrico, shockwaves, distorção e chamas</td>
+            </tr>
+            <tr>
+              <td><span class="badge">/gospel</span></td>
+              <td><code>https://lombrigasound.pages.dev/gospel</code></td>
+              <td>Mandala sagrada, harpa celestial e feixes de luz divina</td>
+            </tr>
+            <tr>
+              <td><span class="badge">/country</span></td>
+              <td><code>https://lombrigasound.pages.dev/country</code></td>
+              <td>Equalizador acústico rústico e ondas em tons de pôr do sol</td>
+            </tr>
+            <tr>
+              <td><span class="badge">/synthwave</span></td>
+              <td><code>https://lombrigasound.pages.dev/synthwave</code></td>
+              <td>Sol retrô 80s neon, grade perspectiva e lasers ciano/magenta</td>
+            </tr>
+            <tr>
+              <td><span class="badge">Fallback Universal</span></td>
+              <td><code>https://lombrigasound.pages.dev/[qualquer-coisa]</code></td>
+              <td>Visualizador adaptativo universal para qualquer rota</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
   <script>
     const iframe = document.getElementById('preview-frame');
     const btnTogglePlay = document.getElementById('btn-toggle-play');
@@ -236,6 +480,22 @@
     iframe.addEventListener('load', () => {
       setTimeout(sendState, 100);
     });
+
+    // Função de Cópia dos Blocos de Código
+    function copyCode(button) {
+      const codeBlock = button.closest('.code-container').querySelector('code');
+      if (codeBlock) {
+        navigator.clipboard.writeText(codeBlock.innerText).then(() => {
+          const originalText = button.textContent;
+          button.textContent = 'Copiado! ✓';
+          button.style.color = '#38bdf8';
+          setTimeout(() => {
+            button.textContent = originalText;
+            button.style.color = '';
+          }, 2000);
+        });
+      }
+    }
   </script>
 </body>
 </html>
