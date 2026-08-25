@@ -209,13 +209,13 @@
         }
       });
 
-      // 7. Espectro de Áudio Estilo Console de Transmissão (Lower-Third Audio Bars)
-      const numBars = 48;
-      const barAreaW = Math.min(w * 0.88, 700);
+      // 7. Espectro de Áudio Estilo Console de Transmissão (Lower Audio Bars)
+      const numBars = 52;
+      const barAreaW = Math.min(w * 0.9, 740);
       const barStartX = cx - barAreaW / 2;
       const barSpacing = barAreaW / numBars;
-      const barMaxH = h * 0.16;
-      const barBaseY = h * 0.86;
+      const barMaxH = h * 0.18;
+      const barBaseY = h * 0.94;
 
       for (let i = 0; i < numBars; i++) {
         const bx = barStartX + i * barSpacing;
@@ -229,7 +229,7 @@
         const barHeight = Math.max(4, rawHeight * barMaxH);
 
         // Segmentos digitais LED
-        const numSegments = 12;
+        const numSegments = 14;
         const segH = barHeight / numSegments;
 
         for (let s = 0; s < numSegments; s++) {
@@ -238,34 +238,15 @@
 
           // Cores: Verde/Ciano na base, Amarelo no meio, Vermelho no pico
           let segColor = '#06b6d4';
-          if (s >= 9) segColor = '#ef4444';
-          else if (s >= 6) segColor = '#f59e0b';
+          if (s >= 11) segColor = '#ef4444';
+          else if (s >= 7) segColor = '#f59e0b';
 
           ctx.fillStyle = segColor;
           ctx.fillRect(bx + 1, sy, barSpacing - 3, (barMaxH / numSegments) - 2);
         }
       }
 
-      // 8. Tarja de Telejornalismo (Live Broadcast HUD)
       ctx.restore();
-      
-      // Barra Inferior de Transmissão
-      ctx.fillStyle = 'rgba(11, 23, 54, 0.85)';
-      ctx.fillRect(0, h - 34, w, 34);
-      ctx.fillStyle = '#ef4444';
-      ctx.fillRect(0, h - 34, 120, 34);
-
-      // Texto "AO VIVO / LIVE"
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 13px system-ui, sans-serif';
-      ctx.fillText('🔴 AO VIVO', 18, h - 12);
-
-      // Ticker de Notícias com Rolagem
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '12px monospace';
-      const tickerText = "LOMBRIGASOUND NEWS // FREQUÊNCIA DE ÁUDIO GLOBAL // TRANSMISSÃO 24H // REDE MUNDIAL DE VISUALIZADORES // 108.4 MHz // 60 FPS BROADCAST";
-      const textOffset = (t * 50) % (w + 800);
-      ctx.fillText(tickerText, w - textOffset, h - 13);
 
       requestAnimationFrame(render);
     }

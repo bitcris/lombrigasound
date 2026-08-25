@@ -189,26 +189,6 @@
 
       ctx.restore();
 
-      // 6. Tarja de Notícias de Última Hora (Breaking News Bar)
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-      ctx.fillRect(0, h - 36, w, 36);
-
-      // Caixa Vermelha "BREAKING"
-      ctx.fillStyle = '#dc2626';
-      ctx.fillRect(0, h - 36, 140, 36);
-
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 13px system-ui, sans-serif';
-      ctx.textAlign = 'left';
-      ctx.fillText('⚡ PLANTÃO', 16, h - 13);
-
-      // Linha de dados ao vivo
-      ctx.fillStyle = '#38bdf8';
-      ctx.font = '12px monospace';
-      const ticker = "TRANSMISSÃO AO VIVO // SINAL DE ÁUDIO HD // FREQÜÊNCIA CENTRAL ESTÁVEL // SATÉLITE GEO-10 // BROADCAST 24/7";
-      const scrollPos = (t * 45) % (w + 700);
-      ctx.fillText(ticker, w - scrollPos, h - 14);
-
       requestAnimationFrame(render);
     }
 
