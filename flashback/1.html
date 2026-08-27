@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Flashback 1 (Disco Fever & Globo Espelhado 70s)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #000000;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    /**
+     * Lombrigasound - Flashback 1: Disco Fever & Globo Espelhado 70s
+     * 
+     * Tema: Era Disco, Studio 54, globo espelhado 3D e pista de dança iluminada.
+     * Paleta: Dourado (#f59e0b), Magenta Disco (#d946ef), Turquesa (#06b6d4),
+     *         Rubi (#f43f5e), Branco (#ffffff), Preto absoluto (#000000).
+     */
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 📡 Listener Obrigatório de postMessage
+    let isPlaying = true;
+    let audioData = null;
+
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+      if (e.data.audioData && Array.isArray(e.data.audioData)) audioData = e.data.audioData;
+    });
+
+    // ✨ Confetes e Partículas de Brilho Disco
+    const NUM_SPARKLES = 65;
+    const sparkles = Array.from({ length: NUM_SPARKLES }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 2.5 + 0.8,
+      speedY: Math.random() * 0.5 + 0.2,
+      rotSpeed: (Math.random() - 0.5) * 0.04,
+      angle: Math.random() * Math.PI * 2,
+      colorIdx: Math.floor(Math.random() * 4),
+      alpha: Math.random() * 0.6 + 0.3
+    }));
+
+    const DISCO_COLORS = [
+      'rgba(245, 158, 11, ',  // Dourado
+      'rgba(217, 70, 239, ',  // Magenta
+      'rgba(6, 182, 212, ',   // Turquesa
+      'rgba(244, 63, 94, '    // Rubi
+    ];
+
+    let t = 0;
+
+    function render() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const ballY = h * 0.26;
+      const minDim = Math.min(w, h);
+      const ballRadius = minDim * 0.13;
+
+      // 1. Limpeza com rastro suave
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+      ctx.fillRect(0, 0, w, h);
+
+      if (isPlaying) {
+        t += 0.016; // Ritmo animado e cadenciado dos anos 70
+      }
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+
+      // 2. Pista de Dança Iluminada em Perspectiva (Base dos Anos 70)
+      const floorTopY = h * 0.72;
+      const numCols = 12;
+      const numRows = 7;
+
+      for (let r = 0; r < numRows; r++) {
+        const rowProg1 = r / numRows;
+        const rowProg2 = (r + 1) / numRows;
+        const y1 = floorTopY + Math.pow(rowProg1, 1.8) * (h - floorTopY);
+        const y2 = floorTopY + Math.pow(rowProg2, 1.8) * (h - floorTopY);
+
+        for (let c = 0; c < numCols; c++) {
+          const colProg1 = (c - numCols / 2) / (numCols / 2);
+          const colProg2 = (c + 1 - numCols / 2) / (numCols / 2);
+
+          const x1a = cx + colProg1 * (w * 0.18 + rowProg1 * (w * 0.55));
+          const x2a = cx + colProg2 * (w * 0.18 + rowProg1 * (w * 0.55));
+          const x1b = cx + colProg1 * (w * 0.18 + rowProg2 * (w * 0.55));
+          const x2b = cx + colProg2 * (w * 0.18 + rowProg2 * (w * 0.55));
+
+          const tileColorIdx = (c + r + Math.floor(t * 1.5)) % DISCO_COLORS.length;
+          const pulseTile = isPlaying ? (0.25 + Math.sin(t * 3 + c * 0.8 + r * 1.2) * 0.2) : 0.15;
+
+          ctx.fillStyle = `${DISCO_COLORS[tileColorIdx]}${pulseTile})`;
+          ctx.beginPath();
+          ctx.moveTo(x1a, y1);
+          ctx.lineTo(x2a, y1);
+          ctx.lineTo(x2b, y2);
+          ctx.lineTo(x1b, y2);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.strokeStyle = `rgba(255, 255, 255, ${pulseTile * 0.6})`;
+          ctx.lineWidth = 1.0;
+          ctx.stroke();
+        }
+      }
+
+      // 3. Feixes Volumétricos de Luz Multicoloridos (Spotlights do Globo)
+      const numBeams = 8;
+      for (let i = 0; i < numBeams; i++) {
+        const beamAngle = (i / numBeams) * Math.PI * 2 + (isPlaying ? t * 0.4 : 0);
+        const beamLen = minDim * 0.9;
+        const targetX = cx + Math.cos(beamAngle) * beamLen;
+        const targetY = ballY + Math.sin(beamAngle) * beamLen + 100;
+        const color = DISCO_COLORS[i % DISCO_COLORS.length];
+        const beamAlpha = (0.12 + Math.sin(t * 2 + i) * 0.05) * (isPlaying ? 1 : 0.4);
+
+        const beamGrad = ctx.createLinearGradient(cx, ballY, targetX, targetY);
+        beamGrad.addColorStop(0, `${color}${beamAlpha * 3})`);
+        beamGrad.addColorStop(0.5, `${color}${beamAlpha})`);
+        beamGrad.addColorStop(1, `${color}0)`);
+
+        ctx.fillStyle = beamGrad;
+        ctx.beginPath();
+        ctx.moveTo(cx - 8, ballY);
+        ctx.lineTo(cx + 8, ballY);
+        ctx.lineTo(targetX + 60, targetY);
+        ctx.lineTo(targetX - 60, targetY);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 4. Globo Espelhado 3D Central
+      // Cabo do globo
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(cx, 0);
+      ctx.lineTo(cx, ballY);
+      ctx.stroke();
+
+      // Halo de brilho do globo
+      const ballGlow = ctx.createRadialGradient(cx, ballY, 2, cx, ballY, ballRadius * 2.4);
+      ballGlow.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+      ballGlow.addColorStop(0.3, 'rgba(245, 158, 11, 0.35)');
+      ballGlow.addColorStop(0.6, 'rgba(217, 70, 239, 0.15)');
+      ballGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+      ctx.fillStyle = ballGlow;
+      ctx.beginPath();
+      ctx.arc(cx, ballY, ballRadius * 2.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Facetas espelhadas 3D do globo
+      const latSteps = 10;
+      const lonSteps = 18;
+      const rotBall = t * 0.6;
+
+      for (let lat = 1; lat < latSteps; lat++) {
+        const phi = (lat / latSteps) * Math.PI - Math.PI / 2;
+        const rLat = ballRadius * Math.cos(phi);
+        const yLat = ballY + ballRadius * Math.sin(phi);
+
+        for (let lon = 0; lon < lonSteps; lon++) {
+          const theta = (lon / lonSteps) * Math.PI * 2 + (isPlaying ? rotBall : 0);
+          const xFacet = cx + rLat * Math.sin(theta);
+          const zFacet = rLat * Math.cos(theta);
+
+          if (zFacet > -5) { // Somente facetas visíveis na frente
+            const facetSize = (ballRadius * 0.14) * (0.8 + (zFacet / ballRadius) * 0.3);
+            const shine = Math.pow(Math.max(0, Math.sin(theta + phi + t * 2)), 3);
+            const fAlpha = (0.3 + (zFacet / ballRadius) * 0.4 + shine * 0.5) * (isPlaying ? 1 : 0.5);
+
+            ctx.fillStyle = shine > 0.6 ? `rgba(255, 255, 255, ${fAlpha})` : `rgba(220, 230, 255, ${fAlpha * 0.8})`;
+            ctx.beginPath();
+            ctx.arc(xFacet, yLat, facetSize * 0.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Ponto de brilho estelar (Lens flare)
+            if (shine > 0.85) {
+              ctx.strokeStyle = `rgba(255, 255, 255, ${shine})`;
+              ctx.lineWidth = 1.2;
+              ctx.beginPath();
+              ctx.moveTo(xFacet - 12, yLat);
+              ctx.lineTo(xFacet + 12, yLat);
+              ctx.moveTo(xFacet, yLat - 12);
+              ctx.lineTo(xFacet, yLat + 12);
+              ctx.stroke();
+            }
+          }
+        }
+      }
+
+      // Anéis de Pulso Acústico ao redor do Globo
+      for (let r = 1; r <= 3; r++) {
+        const ringProg = (t * 0.3 + r * 0.33) % 1;
+        const ringR = ballRadius + ringProg * (minDim * 0.32);
+        const ringAlpha = Math.sin(ringProg * Math.PI) * (isPlaying ? 0.45 : 0.15);
+        const color = DISCO_COLORS[(r + Math.floor(t)) % DISCO_COLORS.length];
+
+        ctx.strokeStyle = `${color}${ringAlpha})`;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(cx, ballY, ringR, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // 5. Partículas de Confete e Glitter em Queda Suave
+      sparkles.forEach(p => {
+        if (isPlaying) {
+          p.y += p.speedY;
+          p.angle += p.rotSpeed;
+          p.x += Math.sin(t * 1.5 + p.angle) * 0.4;
+          if (p.y > h + 15) {
+            p.y = -15;
+            p.x = Math.random() * w;
+          }
+        }
+
+        const color = DISCO_COLORS[p.colorIdx];
+        const twinkle = 0.7 + Math.sin(t * 3.5 + p.angle) * 0.3;
+        const currentAlpha = p.alpha * twinkle * (isPlaying ? 1 : 0.4);
+
+        ctx.fillStyle = `${color}${currentAlpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (p.size > 2.0) {
+          ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha * 0.4})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size * 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      ctx.restore();
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>

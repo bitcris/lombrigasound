@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Flashback 3 (Túnel do Tempo & Vinil Psicodélico)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #000000;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    /**
+     * Lombrigasound - Flashback 3: Túnel do Tempo & Vinil Psicodélico
+     * 
+     * Tema: Toca-discos clássico, vinil com reflexo óptico de arco-íris e túnel do tempo em vórtice psicodélico.
+     * Paleta: Roxo Psicodélico (#a855f7), Azul Elétrico (#3b82f6), Dourado (#f59e0b),
+     *         Rosa Coral (#fb7185), Branco Puro (#ffffff), Fundo Preto Absoluto (#000000).
+     */
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 📡 Listener Obrigatório de postMessage
+    let isPlaying = true;
+    let audioData = null;
+
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+      if (e.data.audioData && Array.isArray(e.data.audioData)) audioData = e.data.audioData;
+    });
+
+    // 🌌 Estrelas do Vórtice Temporal
+    const NUM_STARS = 60;
+    const timeStars = Array.from({ length: NUM_STARS }, () => ({
+      angle: Math.random() * Math.PI * 2,
+      dist: Math.random() * 0.8 + 0.1,
+      speed: Math.random() * 0.004 + 0.002,
+      size: Math.random() * 2.2 + 0.8,
+      alpha: Math.random() * 0.7 + 0.3
+    }));
+
+    let t = 0;
+
+    function render() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const minDim = Math.min(w, h);
+      const vinylRadius = minDim * 0.28;
+
+      // 1. Limpeza suave
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+      ctx.fillRect(0, 0, w, h);
+
+      if (isPlaying) {
+        t += 0.015; // Ritmo fluido a 33 RPM
+      }
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+
+      // 2. Túnel do Tempo Psicodélico (Espiral de Ondas de Memória)
+      const numTunnels = 7;
+      for (let r = 0; r < numTunnels; r++) {
+        const ringProg = (t * 0.2 + r / numTunnels) % 1;
+        const ringR = vinylRadius + ringProg * (minDim * 0.45);
+        const ringAlpha = Math.sin(ringProg * Math.PI) * (isPlaying ? 0.35 : 0.12);
+
+        const colors = [
+          `rgba(168, 85, 247, ${ringAlpha})`,
+          `rgba(59, 130, 246, ${ringAlpha})`,
+          `rgba(251, 113, 133, ${ringAlpha})`,
+          `rgba(245, 158, 11, ${ringAlpha})`
+        ];
+        ctx.strokeStyle = colors[r % colors.length];
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+
+        const segments = 60;
+        for (let s = 0; s <= segments; s++) {
+          const theta = (s / segments) * Math.PI * 2;
+          const wave = isPlaying ? Math.sin(theta * 6 + t * 2 + r) * 8 : 0;
+          const rad = ringR + wave;
+          const px = cx + Math.cos(theta) * rad;
+          const py = cy + Math.sin(theta) * rad;
+
+          if (s === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      // 3. Estrelas em Vórtice Temporal (Viagem no Espaço-Tempo)
+      timeStars.forEach(st => {
+        if (isPlaying) {
+          st.dist += st.speed;
+          st.angle += 0.005;
+          if (st.dist > 1.0) {
+            st.dist = 0.1;
+            st.angle = Math.random() * Math.PI * 2;
+          }
+        }
+
+        const realDist = vinylRadius * 0.8 + st.dist * (minDim * 0.45);
+        const sx = cx + Math.cos(st.angle) * realDist;
+        const sy = cy + Math.sin(st.angle) * realDist;
+        const alpha = st.alpha * Math.sin(st.dist * Math.PI) * (isPlaying ? 1 : 0.4);
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(sx, sy, st.size * (0.8 + st.dist * 1.2), 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 4. Disco de Vinil Central Clássico
+      const rotVinyl = t * 0.8;
+
+      // Corpo Preto do Vinil
+      ctx.fillStyle = '#0a0a0f';
+      ctx.beginPath();
+      ctx.arc(cx, cy, vinylRadius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.lineWidth = 2.0;
+      ctx.stroke();
+
+      // Sulcos Fonográficos do Vinil (Micro-anéis)
+      const numGrooves = 16;
+      for (let g = 1; g < numGrooves; g++) {
+        const gRad = vinylRadius * (0.42 + (g / numGrooves) * 0.54);
+        ctx.strokeStyle = g % 4 === 0 ? 'rgba(255, 255, 255, 0.18)' : 'rgba(255, 255, 255, 0.06)';
+        ctx.lineWidth = 1.0;
+        ctx.beginPath();
+        ctx.arc(cx, cy, gRad, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Reflexo Óptico Prismático de Vinil (Leque de Luz Furta-Cor)
+      const numFlares = 2;
+      for (let f = 0; f < numFlares; f++) {
+        const flareAngle = rotVinyl + f * Math.PI;
+        const gradFlare = ctx.createRadialGradient(cx, cy, vinylRadius * 0.4, cx, cy, vinylRadius);
+        gradFlare.addColorStop(0, 'rgba(255, 255, 255, 0)');
+        gradFlare.addColorStop(0.3, 'rgba(168, 85, 247, 0.25)');
+        gradFlare.addColorStop(0.5, 'rgba(59, 130, 246, 0.22)');
+        gradFlare.addColorStop(0.7, 'rgba(251, 113, 133, 0.25)');
+        gradFlare.addColorStop(0.9, 'rgba(245, 158, 11, 0.2)');
+        gradFlare.addColorStop(1, 'rgba(255, 255, 255, 0)');
+
+        ctx.fillStyle = gradFlare;
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.arc(cx, cy, vinylRadius, flareAngle - 0.35, flareAngle + 0.35);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 5. Selo Vintage Central (Record Label)
+      const labelRadius = vinylRadius * 0.38;
+      const labelGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, labelRadius);
+      labelGrad.addColorStop(0, '#f59e0b');
+      labelGrad.addColorStop(0.7, '#fb7185');
+      labelGrad.addColorStop(1, '#a855f7');
+
+      ctx.fillStyle = labelGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, labelRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Detalhes do Selo
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.arc(cx, cy, labelRadius * 0.85, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Furo Central do Vinil (Spindle Hole)
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(cx, cy, labelRadius * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#ffffff';
+      ctx.lineWidth = 1.6;
+      ctx.stroke();
+
+      // 6. Braço do Toca-Discos (Tonearm em Wireframe Neon)
+      const armBaseX = cx + vinylRadius * 1.25;
+      const armBaseY = cy - vinylRadius * 0.95;
+      const needleX = cx + Math.cos(Math.PI * 0.25) * (vinylRadius * 0.7);
+      const needleY = cy + Math.sin(Math.PI * 0.25) * (vinylRadius * 0.7);
+
+      // Base do braço
+      ctx.fillStyle = 'rgba(245, 158, 11, 0.8)';
+      ctx.beginPath();
+      ctx.arc(armBaseX, armBaseY, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Braço em curva metálica
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(armBaseX, armBaseY);
+      const midArmX = (armBaseX + needleX) * 0.5 + 25;
+      const midArmY = (armBaseY + needleY) * 0.5 - 20;
+      ctx.quadraticCurveTo(midArmX, midArmY, needleX, needleY);
+      ctx.stroke();
+
+      // Cápsula da agulha com LED pulsante
+      ctx.fillStyle = 'rgba(251, 113, 133, 0.95)';
+      ctx.beginPath();
+      ctx.arc(needleX, needleY, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Ponto de luz na agulha
+      const needleGlow = isPlaying ? (0.6 + Math.sin(t * 4) * 0.4) : 0.3;
+      ctx.fillStyle = `rgba(255, 255, 255, ${needleGlow})`;
+      ctx.beginPath();
+      ctx.arc(needleX, needleY, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>

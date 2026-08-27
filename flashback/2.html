@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Flashback 2 (Fita Cassete & VU Meters 80s)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #050508;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    /**
+     * Lombrigasound - Flashback 2: Fita Cassete & VU Meters 80s
+     * 
+     * Tema: Estética Boombox, fita cassete em rotação mecânica, VU meters analógicos de agulha e LEDs Hi-Fi.
+     * Paleta: Laranja Vintage (#f97316), Âmbar (#f59e0b), Verde VU (#22c55e),
+     *         Vermelho Peak (#ef4444), Ciano (#38bdf8), Preto Profundo (#050508).
+     */
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 📡 Listener Obrigatório de postMessage
+    let isPlaying = true;
+    let audioData = null;
+
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+      if (e.data.audioData && Array.isArray(e.data.audioData)) audioData = e.data.audioData;
+    });
+
+    // 📼 Poeira e Partículas de Fita Magnética
+    const NUM_PARTICLES = 45;
+    const tapeDust = Array.from({ length: NUM_PARTICLES }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 2.0 + 0.6,
+      speedX: (Math.random() - 0.5) * 0.4,
+      speedY: Math.random() * 0.35 + 0.15,
+      alpha: Math.random() * 0.5 + 0.25
+    }));
+
+    let t = 0;
+
+    function render() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h * 0.46;
+      const minDim = Math.min(w, h);
+
+      // 1. Limpeza de tela com leve rastro analógico
+      ctx.fillStyle = 'rgba(5, 5, 8, 0.24)';
+      ctx.fillRect(0, 0, w, h);
+
+      if (isPlaying) {
+        t += 0.016; // Ritmo rítmico dos anos 80
+      }
+
+      ctx.save();
+
+      // 2. Scanlines CRT Retrô Sutis
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.12)';
+      for (let y = 0; y < h; y += 4) {
+        ctx.fillRect(0, y, w, 1.5);
+      }
+
+      ctx.globalCompositeOperation = 'screen';
+
+      // 3. Moldura da Fita Cassete (Corpo Retrô)
+      const cassetteW = Math.min(w * 0.82, minDim * 1.35);
+      const cassetteH = cassetteW * 0.55;
+      const xLeft = cx - cassetteW / 2;
+      const yTop = cy - cassetteH / 2;
+
+      // Glow sutil da fita
+      const cassGlow = ctx.createRadialGradient(cx, cy, 10, cx, cy, cassetteW * 0.6);
+      cassGlow.addColorStop(0, 'rgba(249, 115, 22, 0.12)');
+      cassGlow.addColorStop(0.6, 'rgba(56, 189, 248, 0.04)');
+      cassGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = cassGlow;
+      ctx.fillRect(xLeft - 20, yTop - 20, cassetteW + 40, cassetteH + 40);
+
+      // Contorno do chassi da fita K7
+      ctx.strokeStyle = 'rgba(249, 115, 22, 0.7)';
+      ctx.lineWidth = 2.4;
+      ctx.strokeRect(xLeft, yTop, cassetteW, cassetteH);
+
+      // Linha de faixa colorida 80s na fita (Estilo TDK / BASF)
+      const stripeY = yTop + cassetteH * 0.18;
+      const stripeH = cassetteH * 0.12;
+
+      ctx.fillStyle = 'rgba(249, 115, 22, 0.25)';
+      ctx.fillRect(xLeft + 10, stripeY, cassetteW - 20, stripeH * 0.5);
+      ctx.fillStyle = 'rgba(234, 179, 8, 0.25)';
+      ctx.fillRect(xLeft + 10, stripeY + stripeH * 0.5, cassetteW - 20, stripeH * 0.5);
+
+      // Visor transparente central
+      const windowW = cassetteW * 0.52;
+      const windowH = cassetteH * 0.44;
+      const winX = cx - windowW / 2;
+      const winY = cy - windowH / 2;
+
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.6)';
+      ctx.fillRect(winX, winY, windowW, windowH);
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.6)';
+      ctx.lineWidth = 1.8;
+      ctx.strokeRect(winX, winY, windowW, windowH);
+
+      // 4. Dois Carretéis de Fita K7 em Rotação
+      const reelDist = windowW * 0.27;
+      const reelR = windowH * 0.36;
+      const reelY = cy;
+
+      [-1, 1].forEach((side, idx) => {
+        const reelX = cx + side * reelDist;
+        const rotReel = t * (side === -1 ? 1.4 : 1.4);
+
+        // Fita enrolada no carretel (um mais cheio que o outro)
+        const tapeThickness = idx === 0 ? reelR * 0.85 : reelR * 0.55;
+        ctx.fillStyle = 'rgba(120, 53, 15, 0.65)';
+        ctx.beginPath();
+        ctx.arc(reelX, reelY, tapeThickness, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Anel branco do carretel
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.lineWidth = 2.0;
+        ctx.beginPath();
+        ctx.arc(reelX, reelY, reelR * 0.42, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Dentes / Raios do carretel (6 dentes)
+        const numTeeth = 6;
+        for (let d = 0; d < numTeeth; d++) {
+          const toothAngle = (d / numTeeth) * Math.PI * 2 + (isPlaying ? rotReel : 0);
+          const tx1 = reelX + Math.cos(toothAngle) * (reelR * 0.2);
+          const ty1 = reelY + Math.sin(toothAngle) * (reelR * 0.2);
+          const tx2 = reelX + Math.cos(toothAngle) * (reelR * 0.42);
+          const ty2 = reelY + Math.sin(toothAngle) * (reelR * 0.42);
+
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+          ctx.lineWidth = 2.2;
+          ctx.beginPath();
+          ctx.moveTo(tx1, ty1);
+          ctx.lineTo(tx2, ty2);
+          ctx.stroke();
+        }
+
+        // Furo central
+        ctx.fillStyle = '#050508';
+        ctx.beginPath();
+        ctx.arc(reelX, reelY, reelR * 0.18, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Onda de Fita Magnética Estéreo passando entre os carretéis
+      ctx.strokeStyle = 'rgba(56, 189, 248, 0.8)';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      const wavePoints = 40;
+      for (let p = 0; p <= wavePoints; p++) {
+        const prog = p / wavePoints;
+        const wx = (cx - reelDist) + prog * (reelDist * 2);
+        const freq = 12;
+        const amp = isPlaying ? (Math.sin(t * 3 + prog * freq) * 10 + Math.cos(t * 5) * 4) : 0;
+        const wy = cy + amp;
+
+        if (p === 0) ctx.moveTo(wx, wy);
+        else ctx.lineTo(wx, wy);
+      }
+      ctx.stroke();
+
+      // 5. Dois VU Meters Analógicos Estéreo (L & R)
+      const vuW = cassetteW * 0.42;
+      const vuH = cassetteH * 0.30;
+      const vuY = yTop + cassetteH + 18;
+
+      [-1, 1].forEach((side, idx) => {
+        const vuX = cx + side * (vuW * 0.54) - vuW / 2;
+
+        // Fundo do display do VU
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+        ctx.fillRect(vuX, vuY, vuW, vuH);
+        ctx.strokeStyle = 'rgba(249, 115, 22, 0.6)';
+        ctx.lineWidth = 1.6;
+        ctx.strokeRect(vuX, vuY, vuW, vuH);
+
+        // Escala em arco do VU Meter
+        const pivotX = vuX + vuW / 2;
+        const pivotY = vuY + vuH * 1.1;
+        const arcR = vuH * 0.85;
+
+        // Arco Verde (Normal)
+        ctx.strokeStyle = 'rgba(34, 197, 94, 0.7)';
+        ctx.lineWidth = 3.0;
+        ctx.beginPath();
+        ctx.arc(pivotX, pivotY, arcR, -Math.PI * 0.78, -Math.PI * 0.45);
+        ctx.stroke();
+
+        // Arco Vermelho (Peak / +3dB)
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.85)';
+        ctx.lineWidth = 3.0;
+        ctx.beginPath();
+        ctx.arc(pivotX, pivotY, arcR, -Math.PI * 0.45, -Math.PI * 0.22);
+        ctx.stroke();
+
+        // Marcações do mostrador
+        for (let m = 0; m <= 8; m++) {
+          const mAngle = -Math.PI * 0.78 + (m / 8) * (Math.PI * 0.56);
+          const mx1 = pivotX + Math.cos(mAngle) * (arcR - 4);
+          const my1 = pivotY + Math.sin(mAngle) * (arcR - 4);
+          const mx2 = pivotX + Math.cos(mAngle) * (arcR + 4);
+          const my2 = pivotY + Math.sin(mAngle) * (arcR + 4);
+
+          ctx.strokeStyle = m > 5 ? 'rgba(239, 68, 68, 0.8)' : 'rgba(34, 197, 94, 0.8)';
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.moveTo(mx1, my1);
+          ctx.lineTo(mx2, my2);
+          ctx.stroke();
+        }
+
+        // Agulha Analógica do VU
+        const baseNeedle = isPlaying ? (Math.sin(t * (2.8 + idx * 0.4)) * 0.35 + Math.cos(t * 4.2) * 0.15) : -0.5;
+        const needleAngle = -Math.PI * 0.5 + Math.max(-0.45, Math.min(0.45, baseNeedle));
+        const needleLen = arcR + 6;
+        const nx = pivotX + Math.cos(needleAngle) * needleLen;
+        const ny = pivotY + Math.sin(needleAngle) * needleLen;
+
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(pivotX, pivotY);
+        ctx.lineTo(nx, ny);
+        ctx.stroke();
+
+        // Rótulo L / R
+        ctx.fillStyle = 'rgba(249, 115, 22, 0.9)';
+        ctx.font = `bold ${Math.max(10, minDim * 0.02)}px monospace`;
+        ctx.fillText(idx === 0 ? 'VU LEFT' : 'VU RIGHT', vuX + 10, vuY + 16);
+      });
+
+      // 6. Barras de LED Equalizador Hi-Fi nas Laterais
+      const numLeds = 8;
+      const ledW = Math.max(14, minDim * 0.025);
+      const ledH = Math.max(5, minDim * 0.01);
+
+      for (let side = -1; side <= 1; side += 2) {
+        const sideX = cx + side * (cassetteW * 0.5 + 25);
+        for (let l = 0; l < numLeds; l++) {
+          const ly = cy + (l - numLeds / 2) * (ledH + 4);
+          const isPeak = l < 2;
+          const isMid = l >= 2 && l < 5;
+          const activeLevel = isPlaying ? (numLeds - 1 - (Math.sin(t * 3 + side) * 3 + 3)) : numLeds;
+          const isActive = l >= activeLevel;
+
+          let col = isPeak ? '239, 68, 68' : (isMid ? '234, 179, 8' : '34, 197, 94');
+          ctx.fillStyle = isActive ? `rgba(${col}, 0.9)` : `rgba(${col}, 0.12)`;
+          ctx.fillRect(sideX - ledW / 2, ly, ledW, ledH);
+        }
+      }
+
+      // 7. Poeira de Fita Magnética Flutuante
+      tapeDust.forEach(p => {
+        if (isPlaying) {
+          p.x += p.speedX;
+          p.y -= p.speedY;
+          if (p.y < 0) {
+            p.y = h;
+            p.x = Math.random() * w;
+          }
+        }
+
+        const alpha = p.alpha * (isPlaying ? 1 : 0.4);
+        ctx.fillStyle = `rgba(249, 115, 22, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.restore();
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>
