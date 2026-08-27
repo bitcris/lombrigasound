@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lombrigasound - Gospel 1 (Estrela da Manhã & Santuário Cósmico)</title>
+  <title>Lombrigasound - Gospel 1 (Águas Vivas & Aurora Celestial)</title>
   <style>
     * {
       margin: 0;
@@ -11,7 +11,7 @@
       box-sizing: border-box;
     }
     body {
-      background: #000000;
+      background: #010a12;
       overflow: hidden;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
@@ -27,10 +27,11 @@
 
   <script>
     /**
-     * Lombrigasound - Gospel 1: Estrela da Manhã & Santuário Cósmico
+     * Lombrigasound - Gospel 1: Águas Vivas & Aurora Celestial
      * 
-     * Estética: Fundo preto profundo, campo estelar cósmico em paralaxe, geometria sagrada e pulsar divino central.
-     * Paleta: Dourado divino (#fbbf24, #f59e0b), Branco resplandecente (#ffffff), Âmbar suave (#d97706), Preto absoluto (#000000).
+     * Tema: O mar de cristal, águas vivas e a aurora da redenção.
+     * Paleta: Ciano Elétrico (#00f0ff), Azul Celeste (#38bdf8), Azul Profundo (#0284c7),
+     *         Branco Diamante (#ffffff), Gelo (#e0f2fe), Fundo Preto Oceânico (#010a12).
      */
 
     const canvas = document.getElementById('c');
@@ -54,28 +55,21 @@
       if (e.data.audioData && Array.isArray(e.data.audioData)) audioData = e.data.audioData;
     });
 
-    // 🌌 Campo Estelar Cósmico com Paralaxe
-    const NUM_STARS = 75;
-    const stars = Array.from({ length: NUM_STARS }, () => ({
+    // 💧 Gotas e Pérolas de Luz Viva
+    const NUM_DROPS = 55;
+    const droplets = Array.from({ length: NUM_DROPS }, () => ({
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
-      size: Math.random() * 1.6 + 0.6,
-      depth: Math.random() * 0.7 + 0.3,
-      alpha: Math.random() * 0.6 + 0.3,
-      phase: Math.random() * Math.PI * 2
-    }));
-
-    // ✨ Centelhas Celestiais Ascendentes
-    const NUM_EMBERS = 40;
-    const embers = Array.from({ length: NUM_EMBERS }, () => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      size: Math.random() * 2.2 + 0.8,
+      radius: Math.random() * 2.4 + 0.8,
       speedY: Math.random() * 0.45 + 0.2,
-      wobbleSpeed: Math.random() * 0.02 + 0.01,
+      swayFreq: Math.random() * 0.02 + 0.01,
+      swayAmp: Math.random() * 25 + 10,
       phase: Math.random() * Math.PI * 2,
       alpha: Math.random() * 0.6 + 0.3
     }));
+
+    // 🌊 Ondas de Luz Cáustica
+    const NUM_WAVE_LAYERS = 5;
 
     let t = 0;
 
@@ -83,159 +77,193 @@
       const w = canvas.width;
       const h = canvas.height;
       const cx = w / 2;
-      const cy = h / 2;
+      const cy = h * 0.45;
       const minDim = Math.min(w, h);
-      const baseRadius = minDim * 0.23;
+      const orbRadius = minDim * 0.16;
 
-      // 1. Fundo preto absoluto com rastro suave
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+      // 1. Rastro suave com tom azul-marinho ultra profundo
+      ctx.fillStyle = 'rgba(1, 10, 18, 0.24)';
       ctx.fillRect(0, 0, w, h);
 
       if (isPlaying) {
-        t += 0.015; // Ritmo lento, cadenciado e hipnótico
+        t += 0.014; // Ritmo fluido, meditativo e suave
       }
 
       ctx.save();
 
-      // 2. Campo Estelar Cósmico (Profundidade Espacial)
-      stars.forEach(star => {
-        if (isPlaying) {
-          star.y -= 0.15 * star.depth;
-          if (star.y < 0) {
-            star.y = h;
-            star.x = Math.random() * w;
-          }
-        }
-        const twinkle = 0.7 + Math.sin(t * 2 + star.phase) * 0.3;
-        const a = star.alpha * twinkle * (isPlaying ? 1 : 0.4);
-
-        ctx.fillStyle = `rgba(255, 255, 255, ${a})`;
-        ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // 3. Centelhas Celestiais de Glória Flutuantes
-      embers.forEach(p => {
-        if (isPlaying) {
-          p.y -= p.speedY;
-          p.x += Math.sin(t * 1.5 + p.phase) * 0.4;
-          if (p.y < -10) {
-            p.y = h + 10;
-            p.x = Math.random() * w;
-          }
-        }
-        const a = p.alpha * (0.7 + Math.sin(t * 3 + p.phase) * 0.3) * (isPlaying ? 1 : 0.35);
-        ctx.fillStyle = `rgba(251, 191, 36, ${a})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      // 4. Efeitos de Iluminação Volumétrica Central (Modo Screen)
+      // 2. Aurora Celestial Superior (Vento do Espírito)
       ctx.globalCompositeOperation = 'screen';
 
-      const pulse = isPlaying ? (1 + Math.sin(t * 1.8) * 0.07 + Math.cos(t * 3) * 0.03) : 1;
-      const mainRad = baseRadius * pulse;
+      for (let a = 0; a < 3; a++) {
+        const auroraY = h * 0.18 + a * 35;
+        const gradAurora = ctx.createLinearGradient(0, 0, w, h * 0.4);
+        gradAurora.addColorStop(0, 'rgba(0, 240, 255, 0)');
+        gradAurora.addColorStop(0.5, a === 1 ? 'rgba(56, 189, 248, 0.15)' : 'rgba(14, 165, 233, 0.1)');
+        gradAurora.addColorStop(1, 'rgba(0, 240, 255, 0)');
 
-      // Halo de Glória Cósmica
-      const haloGrad = ctx.createRadialGradient(cx, cy, 5, cx, cy, minDim * 0.46 * pulse);
-      haloGrad.addColorStop(0, 'rgba(255, 255, 255, 0.45)');
-      haloGrad.addColorStop(0.2, 'rgba(251, 191, 36, 0.3)');
-      haloGrad.addColorStop(0.5, 'rgba(245, 158, 11, 0.12)');
-      haloGrad.addColorStop(0.85, 'rgba(217, 119, 6, 0.04)');
-      haloGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        ctx.fillStyle = gradAurora;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
 
-      ctx.fillStyle = haloGrad;
+        for (let x = 0; x <= w; x += 20) {
+          const wave1 = Math.sin(x * 0.003 + t * (0.8 + a * 0.3) + a) * 45;
+          const wave2 = Math.cos(x * 0.007 - t * 0.5) * 20;
+          ctx.lineTo(x, auroraY + wave1 + wave2);
+        }
+
+        ctx.lineTo(w, 0);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // 3. Orbe Central de Água Cristalina & Fonte Sagrada
+      const pulse = isPlaying ? (1 + Math.sin(t * 1.6) * 0.07 + Math.cos(t * 2.8) * 0.03) : 1;
+      const currentOrbR = orbRadius * pulse;
+
+      // Halo Luminoso de Refração
+      const orbGlow = ctx.createRadialGradient(cx, cy, 2, cx, cy, currentOrbR * 3.2);
+      orbGlow.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+      orbGlow.addColorStop(0.2, 'rgba(0, 240, 255, 0.6)');
+      orbGlow.addColorStop(0.5, 'rgba(56, 189, 248, 0.25)');
+      orbGlow.addColorStop(0.8, 'rgba(2, 132, 199, 0.08)');
+      orbGlow.addColorStop(1, 'rgba(1, 10, 18, 0)');
+
+      ctx.fillStyle = orbGlow;
       ctx.beginPath();
-      ctx.arc(cx, cy, minDim * 0.46 * pulse, 0, Math.PI * 2);
+      ctx.arc(cx, cy, currentOrbR * 3.2, 0, Math.PI * 2);
       ctx.fill();
 
-      // 5. Geometria Sagrada: Anel de Rosácea com 12 Pétalas em Contra-Rotação
-      const numPetals = 12;
-      const rotMandala = -t * 0.18;
-      ctx.lineWidth = 1.6;
+      // Anéis de Ressonância Líquida (Ondulações Concêntricas)
+      for (let r = 1; r <= 4; r++) {
+        const ringProg = (t * 0.25 + r * 0.25) % 1;
+        const ringR = currentOrbR * (0.8 + ringProg * 2.2);
+        const ringAlpha = Math.sin(ringProg * Math.PI) * (isPlaying ? 0.4 : 0.15);
 
-      for (let i = 0; i < numPetals; i++) {
-        const petalAngle = (i / numPetals) * Math.PI * 2 + rotMandala;
-        const petalDist = mainRad * 0.88;
-        const px = cx + Math.cos(petalAngle) * petalDist;
-        const py = cy + Math.sin(petalAngle) * petalDist;
-        const pRad = mainRad * 0.48 * (isPlaying ? (1 + Math.sin(t * 2 + i) * 0.06) : 1);
-
-        ctx.strokeStyle = i % 2 === 0 ? 'rgba(251, 191, 36, 0.42)' : 'rgba(254, 240, 138, 0.32)';
+        ctx.strokeStyle = `rgba(186, 230, 253, ${ringAlpha})`;
+        ctx.lineWidth = 1.6;
         ctx.beginPath();
-        ctx.arc(px, py, pRad, 0, Math.PI * 2);
+        
+        const segments = 64;
+        for (let s = 0; s <= segments; s++) {
+          const angle = (s / segments) * Math.PI * 2;
+          const deform = isPlaying ? Math.sin(angle * 6 + t * 2 + r) * 4 : 0;
+          const rad = ringR + deform;
+          const px = cx + Math.cos(angle) * rad;
+          const py = cy + Math.sin(angle) * rad;
+
+          if (s === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
         ctx.stroke();
       }
 
-      // 6. Anel de Harmônicos Acústicos
-      const points = 72;
-      ctx.strokeStyle = '#fef08a';
-      ctx.lineWidth = 2.4;
-      ctx.beginPath();
-
-      for (let i = 0; i <= points; i++) {
-        const theta = (i / points) * Math.PI * 2;
-        const wave1 = Math.sin(theta * 8 + t * 2) * (isPlaying ? 10 : 2);
-        const wave2 = Math.cos(theta * 16 - t * 2.8) * (isPlaying ? 5 : 1);
-        const r = mainRad + wave1 + wave2;
-
-        const x = cx + Math.cos(theta) * r;
-        const y = cy + Math.sin(theta) * r;
-
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      }
-      ctx.closePath();
-      ctx.stroke();
-
-      // Anel da Eternidade (Pontilhado Áureo)
-      ctx.strokeStyle = 'rgba(251, 191, 36, 0.55)';
-      ctx.lineWidth = 1.4;
-      ctx.setLineDash([4, 8]);
-      ctx.beginPath();
-      ctx.arc(cx, cy, mainRad * 1.32, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.setLineDash([]);
-
-      // 7. Estrela da Manhã Central (Octagrama & Feixes de Glória)
-      const starRays = 8;
-      for (let i = 0; i < starRays; i++) {
-        const angle = (i / starRays) * Math.PI * 2 + (isPlaying ? t * 0.08 : 0);
-        const isCardinal = (i % 2 === 0);
-        const rayLen = minDim * (isCardinal ? 0.46 : 0.28) * (isPlaying ? (0.92 + Math.sin(t * 2.5 + i) * 0.1) : 0.8);
-
+      // Geometria Sagrada da Fonte: Mandala de Pétalas Líquidas (8 eixos)
+      const numRays = 8;
+      for (let i = 0; i < numRays; i++) {
+        const angle = (i / numRays) * Math.PI * 2 + (isPlaying ? t * 0.1 : 0);
+        const rayLen = currentOrbR * 1.7;
         const rx = cx + Math.cos(angle) * rayLen;
         const ry = cy + Math.sin(angle) * rayLen;
 
-        const rayGrad = ctx.createLinearGradient(cx, cy, rx, ry);
-        rayGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
-        rayGrad.addColorStop(0.3, 'rgba(254, 240, 138, 0.65)');
-        rayGrad.addColorStop(0.6, 'rgba(245, 158, 11, 0.25)');
-        rayGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+        const gradRay = ctx.createLinearGradient(cx, cy, rx, ry);
+        gradRay.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+        gradRay.addColorStop(0.5, 'rgba(0, 240, 255, 0.4)');
+        gradRay.addColorStop(1, 'rgba(0, 240, 255, 0)');
 
-        ctx.strokeStyle = rayGrad;
-        ctx.lineWidth = isCardinal ? 2.6 : 1.4;
+        ctx.strokeStyle = gradRay;
+        ctx.lineWidth = 2.0;
         ctx.beginPath();
         ctx.moveTo(cx, cy);
         ctx.lineTo(rx, ry);
         ctx.stroke();
+
+        // Arcos entrelaçados
+        const nextAngle = ((i + 1) / numRays) * Math.PI * 2 + (isPlaying ? t * 0.1 : 0);
+        const midAngle = (angle + nextAngle) / 2;
+        const arcR = currentOrbR * 1.35;
+        const mx = cx + Math.cos(midAngle) * arcR;
+        const my = cy + Math.sin(midAngle) * arcR;
+
+        ctx.strokeStyle = 'rgba(125, 211, 252, 0.35)';
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(rx, ry);
+        ctx.quadraticCurveTo(mx, my, cx + Math.cos(nextAngle) * rayLen, cy + Math.sin(nextAngle) * rayLen);
+        ctx.stroke();
       }
 
-      // Núcleo Radiante (Coração de Luz)
-      const coreR = mainRad * 0.38;
-      const gradCore = ctx.createRadialGradient(cx, cy, 2, cx, cy, coreR * 2.2);
+      // Núcleo Radiante de Luz Pura
+      const coreR = currentOrbR * 0.45;
+      const gradCore = ctx.createRadialGradient(cx, cy, 1, cx, cy, coreR);
       gradCore.addColorStop(0, '#ffffff');
-      gradCore.addColorStop(0.2, '#fef08a');
-      gradCore.addColorStop(0.5, 'rgba(251, 191, 36, 0.8)');
-      gradCore.addColorStop(0.8, 'rgba(245, 158, 11, 0.3)');
-      gradCore.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      gradCore.addColorStop(0.4, '#e0f2fe');
+      gradCore.addColorStop(0.8, '#38bdf8');
+      gradCore.addColorStop(1, 'rgba(0, 240, 255, 0)');
 
       ctx.fillStyle = gradCore;
       ctx.beginPath();
-      ctx.arc(cx, cy, coreR * 2.2, 0, Math.PI * 2);
+      ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
       ctx.fill();
+
+      // 4. Mar de Cristal / Camadas de Ondas Polifônicas Inferiores
+      for (let wIdx = 0; wIdx < NUM_WAVE_LAYERS; wIdx++) {
+        const baseY = h * 0.65 + wIdx * 28;
+        const waveAlpha = (0.45 - wIdx * 0.07) * (isPlaying ? 1 : 0.4);
+        const color = wIdx % 2 === 0 ? `rgba(0, 240, 255, ${waveAlpha})` : `rgba(56, 189, 248, ${waveAlpha * 0.9})`;
+
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+
+        const stepX = 16;
+        for (let x = 0; x <= w + stepX; x += stepX) {
+          const freq1 = 0.004 + wIdx * 0.0015;
+          const freq2 = 0.009;
+          const amp1 = isPlaying ? (20 + wIdx * 6 + Math.sin(t * 1.5 + wIdx) * 6) : 4;
+          const amp2 = isPlaying ? (8 + Math.cos(t * 2.2 + x * 0.005) * 4) : 1;
+          const wy = baseY + Math.sin(x * freq1 + t * (1.2 + wIdx * 0.2)) * amp1 + Math.cos(x * freq2 - t * 0.8) * amp2;
+
+          if (x === 0) ctx.moveTo(x, wy);
+          else ctx.lineTo(x, wy);
+        }
+        ctx.stroke();
+
+        // Preenchimento translúcido sob as ondas
+        ctx.lineTo(w, h);
+        ctx.lineTo(0, h);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(2, 132, 199, ${waveAlpha * 0.08})`;
+        ctx.fill();
+      }
+
+      // 5. Gotas / Orvalho Celeste em Ascensão
+      droplets.forEach(p => {
+        if (isPlaying) {
+          p.y -= p.speedY;
+          p.x += Math.sin(t * 1.5 + p.phase) * 0.45;
+          if (p.y < -15) {
+            p.y = h + 15;
+            p.x = Math.random() * w;
+          }
+        }
+
+        const twinkle = 0.75 + Math.sin(t * 3 + p.phase) * 0.25;
+        const currentAlpha = p.alpha * twinkle * (isPlaying ? 1 : 0.4);
+
+        ctx.fillStyle = `rgba(224, 242, 254, ${currentAlpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Brilho difuso em gotas maiores
+        if (p.radius > 1.8) {
+          ctx.fillStyle = `rgba(0, 240, 255, ${currentAlpha * 0.35})`;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.radius * 2.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
 
       ctx.restore();
 

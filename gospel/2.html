@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lombrigasound - Gospel 2 (Pilar de Glória & Fitas Celestiais)</title>
+  <title>Lombrigasound - Gospel 2 (Fogo Sagrado & Prisma dos Serafins)</title>
   <style>
     * {
       margin: 0;
@@ -11,7 +11,7 @@
       box-sizing: border-box;
     }
     body {
-      background: #000000;
+      background: #06010a;
       overflow: hidden;
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     }
@@ -27,10 +27,11 @@
 
   <script>
     /**
-     * Lombrigasound - Gospel 2: Pilar de Glória & Fitas Celestiais
+     * Lombrigasound - Gospel 2: Fogo Sagrado & Prisma dos Serafins
      * 
-     * Estética: Fundo preto profundo, pilar de ascensão vertical, fitas de luz de ouro líquido e centelhas seráficas.
-     * Paleta: Ouro puro (#fbbf24, #f59e0b), Luz celestial (#ffffff), Âmbar quente (#d97706), Preto profundo (#000000).
+     * Tema: A Shekinah, o fogo refinador e as asas dos querubins/serafins em geometria sagrada 3D.
+     * Paleta: Púrpura Real (#7e22ce), Magenta Místico (#c026d3), Rubi Flamejante (#f43f5e),
+     *         Rosa Quartzo (#f472b6), Branco Resplandecente (#ffffff), Fundo Negro Profundo (#06010a).
      */
 
     const canvas = document.getElementById('c');
@@ -54,25 +55,34 @@
       if (e.data.audioData && Array.isArray(e.data.audioData)) audioData = e.data.audioData;
     });
 
-    // 🌌 Estrelas Tênues de Fundo
-    const NUM_STARS = 60;
-    const stars = Array.from({ length: NUM_STARS }, () => ({
-      x: Math.random() * window.innerWidth,
+    // 🔥 Centelhas de Plasma Sagrado (Vórtice Ascendente)
+    const NUM_SPARKS = 60;
+    const sparks = Array.from({ length: NUM_SPARKS }, () => ({
+      angle: Math.random() * Math.PI * 2,
+      dist: Math.random() * 260 + 20,
       y: Math.random() * window.innerHeight,
-      size: Math.random() * 1.5 + 0.5,
-      alpha: Math.random() * 0.5 + 0.25
+      speedY: Math.random() * 0.6 + 0.3,
+      rotSpeed: (Math.random() - 0.5) * 0.03,
+      size: Math.random() * 2.5 + 0.8,
+      alpha: Math.random() * 0.6 + 0.3,
+      isRuby: Math.random() > 0.4
     }));
 
-    // ✨ Centelhas Seráficas Ascendentes
-    const NUM_PARTICLES = 50;
-    const particles = Array.from({ length: NUM_PARTICLES }, () => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      size: Math.random() * 2.4 + 0.8,
-      speedY: Math.random() * 0.55 + 0.25,
-      swayPhase: Math.random() * Math.PI * 2,
-      alpha: Math.random() * 0.6 + 0.3
-    }));
+    // 💎 Vértices de um Octaedro 3D
+    const OCTA_VERTICES = [
+      [ 0, -1.5,  0],  // Topo
+      [ 0,  1.5,  0],  // Base
+      [ 1.2,  0,  0],  // Direita
+      [-1.2,  0,  0],  // Esquerda
+      [ 0,  0,  1.2],  // Frente
+      [ 0,  0, -1.2]   // Trás
+    ];
+
+    const OCTA_EDGES = [
+      [0, 2], [0, 3], [0, 4], [0, 5],
+      [1, 2], [1, 3], [1, 4], [1, 5],
+      [2, 4], [4, 3], [3, 5], [5, 2]
+    ];
 
     let t = 0;
 
@@ -80,148 +90,201 @@
       const w = canvas.width;
       const h = canvas.height;
       const cx = w / 2;
-      const haloY = h * 0.28;
+      const cy = h / 2;
       const minDim = Math.min(w, h);
+      const scale3D = minDim * 0.17;
 
-      // 1. Limpeza de fundo em preto absoluto com rastro suave
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+      // 1. Rastro suave com tom púrpura ultra profundo
+      ctx.fillStyle = 'rgba(6, 1, 10, 0.22)';
       ctx.fillRect(0, 0, w, h);
 
       if (isPlaying) {
-        t += 0.016; // Ritmo lento, sereno e hipnótico
+        t += 0.015; // Ritmo solene, poderoso e refinado
       }
 
       ctx.save();
+      ctx.globalCompositeOperation = 'screen';
 
-      // 2. Estrelas Tênues no Fundo
-      stars.forEach(star => {
-        ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha * (isPlaying ? 1 : 0.4)})`;
+      // 2. Halo de Glória Shekinah (Fogo Cósmico Violeta & Rubi)
+      const pulse = isPlaying ? (1 + Math.sin(t * 1.8) * 0.08 + Math.cos(t * 3.2) * 0.04) : 1;
+      const haloR = minDim * 0.42 * pulse;
+
+      const shekinahGlow = ctx.createRadialGradient(cx, cy, 5, cx, cy, haloR);
+      shekinahGlow.addColorStop(0, 'rgba(255, 255, 255, 0.65)');
+      shekinahGlow.addColorStop(0.2, 'rgba(244, 63, 94, 0.35)');
+      shekinahGlow.addColorStop(0.5, 'rgba(192, 38, 211, 0.18)');
+      shekinahGlow.addColorStop(0.8, 'rgba(126, 34, 206, 0.05)');
+      shekinahGlow.addColorStop(1, 'rgba(6, 1, 10, 0)');
+
+      ctx.fillStyle = shekinahGlow;
+      ctx.beginPath();
+      ctx.arc(cx, cy, haloR, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 3. Asas de Luz dos Serafins (Arcos Harmônicos de Energia Púrpura)
+      const numFeathers = 14;
+      for (let side = -1; side <= 1; side += 2) {
+        for (let i = 0; i < numFeathers; i++) {
+          const progress = i / numFeathers;
+          const wingSpread = isPlaying ? Math.sin(t * 1.4) * 0.15 : 0;
+          const wingAngle = (-Math.PI * 0.45 + progress * Math.PI * 0.8 + wingSpread) * side;
+          const wingLen = minDim * (0.24 + progress * 0.22) * pulse;
+
+          const startX = cx + side * (minDim * 0.05);
+          const startY = cy + (progress - 0.5) * 50;
+
+          const endX = startX + Math.cos(wingAngle) * wingLen * side;
+          const endY = startY + Math.sin(wingAngle) * wingLen;
+
+          const ctrlX = startX + side * (wingLen * 0.65);
+          const ctrlY = startY - 80 * (1 - progress);
+
+          const gradWing = ctx.createLinearGradient(startX, startY, endX, endY);
+          gradWing.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
+          gradWing.addColorStop(0.4, 'rgba(244, 63, 94, 0.45)');
+          gradWing.addColorStop(0.8, 'rgba(192, 38, 211, 0.2)');
+          gradWing.addColorStop(1, 'rgba(126, 34, 206, 0)');
+
+          ctx.strokeStyle = gradWing;
+          ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          ctx.quadraticCurveTo(ctrlX, ctrlY, endX, endY);
+          ctx.stroke();
+
+          // Ponto de luz na ponta de cada pena de fogo
+          const sparkAlpha = (0.7 + Math.sin(t * 3 + i) * 0.3) * (isPlaying ? 1 : 0.4);
+          ctx.fillStyle = `rgba(255, 255, 255, ${sparkAlpha})`;
+          ctx.beginPath();
+          ctx.arc(endX, endY, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // 4. Prisma Merkaba / Octaedro 3D em Rotação Sagrada
+      const rotX = t * 0.4;
+      const rotY = t * 0.6;
+      const rotZ = t * 0.2;
+
+      // Matriz de rotação 3D
+      const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+      const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+      const cosZ = Math.cos(rotZ), sinZ = Math.sin(rotZ);
+
+      const projected = OCTA_VERTICES.map(v => {
+        let x = v[0], y = v[1], z = v[2];
+
+        // Rotação Y
+        let x1 = x * cosY + z * sinY;
+        let z1 = -x * sinY + z * cosY;
+
+        // Rotação X
+        let y2 = y * cosX - z1 * sinX;
+        let z2 = y * sinX + z1 * cosX;
+
+        // Rotação Z
+        let x3 = x1 * cosZ - y2 * sinZ;
+        let y3 = x1 * sinZ + y2 * cosZ;
+
+        // Perspectiva
+        const fov = 3.5;
+        const pz = z2 + fov;
+        const projX = cx + (x3 / pz) * scale3D * 3.2 * pulse;
+        const projY = cy + (y3 / pz) * scale3D * 3.2 * pulse;
+
+        return { x: projX, y: projY, z: z2 };
+      });
+
+      // Desenho das arestas do Octaedro
+      OCTA_EDGES.forEach(([i1, i2]) => {
+        const p1 = projected[i1];
+        const p2 = projected[i2];
+        const avgZ = (p1.z + p2.z) / 2;
+        const edgeAlpha = Math.min(1, Math.max(0.2, (avgZ + 1.8) / 3)) * (isPlaying ? 0.9 : 0.4);
+
+        ctx.strokeStyle = `rgba(244, 114, 182, ${edgeAlpha})`;
+        ctx.lineWidth = 2.4;
         ctx.beginPath();
-        ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.stroke();
+
+        // Linha interna de brilho branco
+        ctx.strokeStyle = `rgba(255, 255, 255, ${edgeAlpha * 0.7})`;
+        ctx.lineWidth = 1.0;
+        ctx.stroke();
+      });
+
+      // Vértices brilhantes
+      projected.forEach(p => {
+        const vAlpha = (0.7 + Math.sin(t * 4 + p.z) * 0.3) * (isPlaying ? 1 : 0.4);
+        ctx.fillStyle = `rgba(255, 255, 255, ${vAlpha})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4.0, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = `rgba(244, 63, 94, ${vAlpha * 0.4})`;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
         ctx.fill();
       });
 
-      ctx.globalCompositeOperation = 'screen';
+      // 5. Coração Rubi Radiante Central (Fonte de Vida)
+      const coreR = minDim * 0.07 * pulse;
+      const gradCore = ctx.createRadialGradient(cx, cy, 2, cx, cy, coreR * 2.8);
+      gradCore.addColorStop(0, '#ffffff');
+      gradCore.addColorStop(0.3, '#f472b6');
+      gradCore.addColorStop(0.6, 'rgba(244, 63, 94, 0.8)');
+      gradCore.addColorStop(0.9, 'rgba(192, 38, 211, 0.2)');
+      gradCore.addColorStop(1, 'rgba(6, 1, 10, 0)');
 
-      // 3. Pilar de Ascensão de Glória (Feixe Vertical Central)
-      const pillarWidth = isPlaying ? (minDim * 0.12 + Math.sin(t * 1.5) * 12) : (minDim * 0.1);
-      const pillarGrad = ctx.createLinearGradient(cx - pillarWidth, 0, cx + pillarWidth, 0);
-      pillarGrad.addColorStop(0, 'rgba(217, 119, 6, 0)');
-      pillarGrad.addColorStop(0.3, 'rgba(245, 158, 11, 0.16)');
-      pillarGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.42)');
-      pillarGrad.addColorStop(0.7, 'rgba(245, 158, 11, 0.16)');
-      pillarGrad.addColorStop(1, 'rgba(217, 119, 6, 0)');
-
-      ctx.fillStyle = pillarGrad;
-      ctx.fillRect(cx - pillarWidth * 1.5, 0, pillarWidth * 3, h);
-
-      // Anéis de Ressonância que sobem pelo Pilar
-      for (let i = 0; i < 4; i++) {
-        const ringProgress = (t * 0.25 + i * 0.25) % 1;
-        const ry = h * (1 - ringProgress);
-        const rx = cx;
-        const ringRadius = (minDim * 0.08) + ringProgress * (minDim * 0.14);
-        const ringAlpha = Math.sin(ringProgress * Math.PI) * (isPlaying ? 0.35 : 0.1);
-
-        ctx.strokeStyle = `rgba(254, 240, 138, ${ringAlpha})`;
-        ctx.lineWidth = 1.6;
-        ctx.beginPath();
-        ctx.ellipse(rx, ry, ringRadius, ringRadius * 0.32, 0, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-
-      // 4. Halo Superior & Coroa de Luz Celestial
-      const haloRad = minDim * 0.16;
-      const haloPulse = isPlaying ? (1 + Math.sin(t * 2) * 0.08) : 1;
-      
-      const gradHalo = ctx.createRadialGradient(cx, haloY, 2, cx, haloY, haloRad * 2.2 * haloPulse);
-      gradHalo.addColorStop(0, '#ffffff');
-      gradHalo.addColorStop(0.2, '#fef08a');
-      gradHalo.addColorStop(0.5, 'rgba(251, 191, 36, 0.55)');
-      gradHalo.addColorStop(0.8, 'rgba(245, 158, 11, 0.15)');
-      gradHalo.addColorStop(1, 'rgba(0, 0, 0, 0)');
-
-      ctx.fillStyle = gradHalo;
+      ctx.fillStyle = gradCore;
       ctx.beginPath();
-      ctx.arc(cx, haloY, haloRad * 2.2 * haloPulse, 0, Math.PI * 2);
+      ctx.arc(cx, cy, coreR * 2.8, 0, Math.PI * 2);
       ctx.fill();
 
-      // Anéis Acústicos Concêntricos do Halo
-      for (let r = 1; r <= 3; r++) {
-        const ringRad = haloRad * (0.6 + r * 0.45) * haloPulse;
-        const ringAlpha = (0.35 - r * 0.07) * (isPlaying ? 1 : 0.4);
-        ctx.strokeStyle = `rgba(254, 240, 138, ${ringAlpha})`;
+      // 6. Anéis de Pulso Gravitacional de Glória
+      for (let r = 0; r < 3; r++) {
+        const ringProg = (t * 0.28 + r * 0.33) % 1;
+        const ringR = (minDim * 0.1) + ringProg * (minDim * 0.38);
+        const ringAlpha = Math.sin(ringProg * Math.PI) * (isPlaying ? 0.45 : 0.15);
+
+        ctx.strokeStyle = r % 2 === 0 ? `rgba(244, 63, 94, ${ringAlpha})` : `rgba(192, 38, 211, ${ringAlpha})`;
         ctx.lineWidth = 1.8;
         ctx.beginPath();
-        for (let a = 0; a <= 64; a++) {
-          const angle = (a / 64) * Math.PI * 2;
-          const waveDist = isPlaying ? Math.sin(angle * 8 + t * (r % 2 === 0 ? 2 : -2)) * 5 : 0;
-          const rad = ringRad + waveDist;
-          const rx = cx + Math.cos(angle) * rad;
-          const ry = haloY + Math.sin(angle) * rad;
-          if (a === 0) ctx.moveTo(rx, ry);
-          else ctx.lineTo(rx, ry);
-        }
-        ctx.closePath();
+        ctx.ellipse(cx, cy, ringR, ringR * 0.45, t * 0.2 + r, 0, Math.PI * 2);
         ctx.stroke();
       }
 
-      // 5. Fitas de Luz Fluida & Rio de Cristal (Curvas de Bézier na Base)
-      const numRibbons = 4;
-      for (let i = 0; i < numRibbons; i++) {
-        const baseY = h * 0.70 + i * 24;
-        const ribbonAlpha = (0.42 - i * 0.08) * (isPlaying ? 1 : 0.35);
-
-        ctx.strokeStyle = i % 2 === 0 ? `rgba(254, 240, 138, ${ribbonAlpha})` : `rgba(251, 191, 36, ${ribbonAlpha * 0.9})`;
-        ctx.lineWidth = 2.2;
-        ctx.beginPath();
-
-        const segments = 50;
-        const stepX = w / segments;
-
-        for (let s = 0; s <= segments; s++) {
-          const x = s * stepX;
-          const freq1 = 0.005 + i * 0.002;
-          const amp1 = isPlaying ? (18 + i * 6 + Math.sin(t * 1.5 + i) * 6) : 3;
-          const amp2 = isPlaying ? (8 + Math.cos(t * 2 + s * 0.1) * 4) : 1;
-          const wy = baseY + Math.sin(x * freq1 + t * (1.1 + i * 0.25)) * amp1 + Math.cos(x * 0.01 - t * 0.8) * amp2;
-
-          if (s === 0) ctx.moveTo(x, wy);
-          else ctx.lineTo(x, wy);
-        }
-        ctx.stroke();
-
-        // Véu translúcido sob a fita
-        ctx.fillStyle = `rgba(245, 158, 11, ${ribbonAlpha * 0.1})`;
-        ctx.lineTo(w, h);
-        ctx.lineTo(0, h);
-        ctx.closePath();
-        ctx.fill();
-      }
-
-      // 6. Centelhas Seráficas Flutuantes
-      particles.forEach(p => {
+      // 7. Centelhas de Plasma Celestial em Vórtice
+      sparks.forEach(p => {
         if (isPlaying) {
           p.y -= p.speedY;
-          p.x += Math.sin(t * 1.8 + p.swayPhase) * 0.4;
-          if (p.y < -10) {
-            p.y = h + 10;
-            p.x = Math.random() * w;
+          p.angle += p.rotSpeed;
+          if (p.y < -20) {
+            p.y = h + 20;
+            p.dist = Math.random() * (minDim * 0.4) + 20;
           }
         }
 
-        const twinkle = 0.75 + Math.sin(t * 3.5 + p.swayPhase) * 0.25;
+        const sx = cx + Math.cos(p.angle) * p.dist;
+        const sy = p.y;
+
+        const twinkle = 0.7 + Math.sin(t * 3.5 + p.angle) * 0.3;
         const currentAlpha = p.alpha * twinkle * (isPlaying ? 1 : 0.4);
 
-        ctx.fillStyle = `rgba(255, 255, 255, ${currentAlpha})`;
+        ctx.fillStyle = p.isRuby 
+          ? `rgba(244, 63, 94, ${currentAlpha})` 
+          : `rgba(244, 114, 182, ${currentAlpha})`;
+
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.arc(sx, sy, p.size, 0, Math.PI * 2);
         ctx.fill();
 
         if (p.size > 2.0) {
-          ctx.fillStyle = `rgba(251, 191, 36, ${currentAlpha * 0.3})`;
+          ctx.fillStyle = `rgba(192, 38, 211, ${currentAlpha * 0.3})`;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, p.size * 2.8, 0, Math.PI * 2);
+          ctx.arc(sx, sy, p.size * 2.8, 0, Math.PI * 2);
           ctx.fill();
         }
       });
