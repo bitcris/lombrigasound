@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Universal 9 (Relevo Topográfico 3D & Synth Horizon)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #02040c;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    /**
+     * Lombrigasound - Universal Default 9: Relevo Topográfico 3D & Synth Horizon
+     * 
+     * Estilo: Malha topográfica tridimensional infinita em perspectiva com montanhas de frequência sonora,
+     *         sol volumétrico no horizonte e névoa de altitude.
+     * Paleta: Azul Profundo (#1e40af), Ciano Elétrico (#00f0ff), Púrpura Neon (#a855f7),
+     *         Pêssego Incandescente (#fdba74), Fundo Preto Estelar (#02040c).
+     */
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 📡 Listener Obrigatório de postMessage
+    let isPlaying = true;
+    let audioData = null;
+
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+      if (e.data.audioData && Array.isArray(e.data.audioData)) audioData = e.data.audioData;
+    });
+
+    // 🌌 Estrelas do Céu Noturno
+    const NUM_STARS = 65;
+    const stars = Array.from({ length: NUM_STARS }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * (window.innerHeight * 0.55),
+      size: Math.random() * 1.6 + 0.6,
+      alpha: Math.random() * 0.6 + 0.3
+    }));
+
+    let t = 0;
+
+    function render() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const horizonY = h * 0.52;
+      const minDim = Math.min(w, h);
+      const sunRadius = minDim * 0.16;
+
+      // 1. Limpeza de tela
+      ctx.fillStyle = 'rgba(2, 4, 12, 0.24)';
+      ctx.fillRect(0, 0, w, h);
+
+      if (isPlaying) {
+        t += 0.018; // Deslocamento de terreno contínuo
+      }
+
+      ctx.save();
+
+      // 2. Céu Noturno & Estrelas
+      stars.forEach(st => {
+        ctx.fillStyle = `rgba(255, 255, 255, ${st.alpha * (isPlaying ? 1 : 0.4)})`;
+        ctx.beginPath();
+        ctx.arc(st.x, st.y, st.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.globalCompositeOperation = 'screen';
+
+      // 3. Sol Volumétrico no Horizonte
+      const sunPulse = isPlaying ? (1 + Math.sin(t * 1.5) * 0.05) : 1;
+      const sR = sunRadius * sunPulse;
+
+      const sunGlow = ctx.createRadialGradient(cx, horizonY - sR * 0.2, 5, cx, horizonY - sR * 0.2, sR * 2.5);
+      sunGlow.addColorStop(0, '#ffffff');
+      sunGlow.addColorStop(0.3, 'rgba(253, 186, 116, 0.7)');
+      sunGlow.addColorStop(0.6, 'rgba(168, 85, 247, 0.25)');
+      sunGlow.addColorStop(1, 'rgba(2, 4, 12, 0)');
+
+      ctx.fillStyle = sunGlow;
+      ctx.beginPath();
+      ctx.arc(cx, horizonY - sR * 0.2, sR * 2.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Linhas horizontais do sol estilo retrô-futurista
+      for (let s = 1; s <= 6; s++) {
+        const sy = (horizonY - sR) + (s / 7) * sR * 1.8;
+        const lineW = Math.sqrt(Math.max(0, sR * sR - Math.pow(sy - (horizonY - sR * 0.2), 2))) * 1.9;
+        if (lineW > 0) {
+          ctx.fillStyle = 'rgba(2, 4, 12, 0.75)';
+          ctx.fillRect(cx - lineW / 2, sy, lineW, 3.5);
+        }
+      }
+
+      // 4. Malha Topográfica 3D em Perspectiva (Terreno de Montanhas Sonoras)
+      const numLines = 26;
+      const numPointsPerLine = 48;
+      const speedOffset = (t * 0.4) % 1;
+
+      for (let i = numLines; i >= 1; i--) {
+        const zNorm = (i - speedOffset) / numLines;
+        const yBase = horizonY + Math.pow(zNorm, 2.2) * (h - horizonY);
+        const spreadW = w * 0.2 + zNorm * (w * 0.95);
+        const lineAlpha = Math.pow(zNorm, 1.2) * (isPlaying ? 0.9 : 0.4);
+
+        // Gradiente da linha topográfica
+        const lineGrad = ctx.createLinearGradient(cx - spreadW / 2, yBase, cx + spreadW / 2, yBase);
+        lineGrad.addColorStop(0, `rgba(30, 64, 175, 0)`);
+        lineGrad.addColorStop(0.2, `rgba(0, 240, 255, ${lineAlpha * 0.8})`);
+        lineGrad.addColorStop(0.5, `rgba(255, 255, 255, ${lineAlpha})`);
+        lineGrad.addColorStop(0.8, `rgba(168, 85, 247, ${lineAlpha * 0.8})`);
+        lineGrad.addColorStop(1, `rgba(30, 64, 175, 0)`);
+
+        ctx.strokeStyle = lineGrad;
+        ctx.lineWidth = Math.max(1.2, zNorm * 2.4);
+        ctx.beginPath();
+
+        for (let p = 0; p <= numPointsPerLine; p++) {
+          const pNorm = (p / numPointsPerLine) - 0.5; // -0.5 a 0.5
+          const px = cx + pNorm * spreadW;
+
+          // Relevo sonoro de montanhas com pico nas laterais e vale no meio
+          const distFromCenter = Math.abs(pNorm * 2);
+          const mountainWeight = Math.pow(distFromCenter, 1.8);
+
+          const wave1 = Math.sin(p * 0.4 + t * 2 + i * 0.3) * (isPlaying ? 35 : 5);
+          const wave2 = Math.cos(p * 0.8 - t * 1.5) * (isPlaying ? 15 : 2);
+          const elevation = (wave1 + wave2) * mountainWeight * zNorm * (minDim * 0.003);
+
+          const py = yBase - elevation;
+
+          if (p === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.stroke();
+      }
+
+      // 5. Linha de Horizonte com Brilho Neon
+      ctx.strokeStyle = 'rgba(0, 240, 255, 0.8)';
+      ctx.lineWidth = 2.0;
+      ctx.beginPath();
+      ctx.moveTo(0, horizonY);
+      ctx.lineTo(w, horizonY);
+      ctx.stroke();
+
+      ctx.restore();
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>

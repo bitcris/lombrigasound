@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lombrigasound - Universal 6 (Buraco Negro & Disco de Acreção)</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #000000;
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    canvas {
+      display: block;
+      width: 100vw;
+      height: 100vh;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="c"></canvas>
+
+  <script>
+    /**
+     * Lombrigasound - Universal Default 6: Buraco Negro & Disco de Acreção
+     * 
+     * Estilo: Lente gravitacional, disco de acreção em espiral relativística, horizonte de eventos e jatos de plasma polar.
+     * Paleta: Laranja Plasma (#f97316), Ouro Relativístico (#f59e0b), Azul Doppler (#38bdf8),
+     *         Branco Incandescente (#ffffff), Preto Singularidade (#000000).
+     */
+
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // 📡 Listener Obrigatório de postMessage
+    let isPlaying = true;
+    let audioData = null;
+
+    window.addEventListener('message', (e) => {
+      if (!e.data) return;
+      if (e.data.isPlaying !== undefined) isPlaying = Boolean(e.data.isPlaying);
+      else if (e.data.playing !== undefined) isPlaying = Boolean(e.data.playing);
+      if (e.data.audioData && Array.isArray(e.data.audioData)) audioData = e.data.audioData;
+    });
+
+    // 🌌 Campo Estelar Distorcido
+    const NUM_STARS = 70;
+    const stars = Array.from({ length: NUM_STARS }, () => ({
+      x: Math.random() * window.innerWidth,
+      y: Math.random() * window.innerHeight,
+      size: Math.random() * 1.8 + 0.6,
+      alpha: Math.random() * 0.6 + 0.3
+    }));
+
+    // ⚡ Partículas de Plasma dos Jatos Polares
+    const NUM_JET_PARTICLES = 50;
+    const jetParticles = Array.from({ length: NUM_JET_PARTICLES }, () => ({
+      side: Math.random() > 0.5 ? 1 : -1,
+      dist: Math.random() * 300 + 30,
+      spread: (Math.random() - 0.5) * 40,
+      speed: Math.random() * 2.5 + 1.2,
+      size: Math.random() * 2.2 + 0.8,
+      alpha: Math.random() * 0.6 + 0.3
+    }));
+
+    let t = 0;
+
+    function render() {
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const minDim = Math.min(w, h);
+      const eventHorizonR = minDim * 0.14;
+
+      // 1. Limpeza de rastro
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.22)';
+      ctx.fillRect(0, 0, w, h);
+
+      if (isPlaying) {
+        t += 0.015; // Rotação relativística majestosa
+      }
+
+      ctx.save();
+
+      // 2. Estrelas de Fundo com Lente Gravitacional Suave
+      stars.forEach(st => {
+        const dx = st.x - cx;
+        const dy = st.y - cy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        // Efeito de desvio de luz gravitacional
+        let renderX = st.x;
+        let renderY = st.y;
+        if (dist > eventHorizonR && dist < minDim * 0.6) {
+          const bend = (eventHorizonR / dist) * 12;
+          renderX += (dx / dist) * bend;
+          renderY += (dy / dist) * bend;
+        }
+
+        ctx.fillStyle = `rgba(255, 255, 255, ${st.alpha * (isPlaying ? 1 : 0.4)})`;
+        ctx.beginPath();
+        ctx.arc(renderX, renderY, st.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      ctx.globalCompositeOperation = 'screen';
+
+      // 3. Jatos Relativísticos de Plasma Polares (Norte e Sul)
+      [-1, 1].forEach(dir => {
+        const jetGrad = ctx.createLinearGradient(cx, cy, cx, cy + dir * (h * 0.45));
+        jetGrad.addColorStop(0, 'rgba(56, 189, 248, 0.6)');
+        jetGrad.addColorStop(0.3, 'rgba(0, 212, 255, 0.25)');
+        jetGrad.addColorStop(0.7, 'rgba(147, 51, 234, 0.08)');
+        jetGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+
+        ctx.fillStyle = jetGrad;
+        ctx.beginPath();
+        ctx.moveTo(cx - 8, cy);
+        ctx.lineTo(cx + 8, cy);
+        ctx.lineTo(cx + 40, cy + dir * (h * 0.45));
+        ctx.lineTo(cx - 40, cy + dir * (h * 0.45));
+        ctx.closePath();
+        ctx.fill();
+      });
+
+      // Partículas nos Jatos
+      jetParticles.forEach(p => {
+        if (isPlaying) {
+          p.dist += p.speed;
+          if (p.dist > h * 0.5) p.dist = eventHorizonR * 0.8;
+        }
+        const py = cy + p.side * p.dist;
+        const px = cx + p.spread * (p.dist / (h * 0.5));
+        const alpha = p.alpha * (1 - p.dist / (h * 0.5)) * (isPlaying ? 1 : 0.4);
+
+        ctx.fillStyle = `rgba(56, 189, 248, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(px, py, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 4. Disco de Acreção Superior (Curvatura Gravitacional Traseira)
+      const pulse = isPlaying ? (1 + Math.sin(t * 1.8) * 0.06 + Math.cos(t * 3.2) * 0.03) : 1;
+      const numRings = 24;
+
+      for (let r = numRings; r >= 1; r--) {
+        const ringProg = r / numRings;
+        const radX = (eventHorizonR * 1.1 + ringProg * (minDim * 0.32)) * pulse;
+        const radY = radX * 0.36;
+        const ringAlpha = (1 - ringProg * 0.7) * (0.45 + Math.sin(t * 2 + r * 0.4) * 0.15) * (isPlaying ? 1 : 0.4);
+
+        // Arco do disco de acreção (Parte de trás/superior deformada)
+        ctx.strokeStyle = ringProg > 0.6 
+          ? `rgba(249, 115, 22, ${ringAlpha * 0.6})` 
+          : (ringProg > 0.3 ? `rgba(245, 158, 11, ${ringAlpha * 0.8})` : `rgba(255, 255, 255, ${ringAlpha})`);
+        ctx.lineWidth = 2.4;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy - (eventHorizonR * 0.25 * (1 - ringProg)), radX * 0.9, radY * 1.4, 0, Math.PI, 0);
+        ctx.stroke();
+      }
+
+      // 5. Disco de Acreção Principal (Plano Frontal Inclinado)
+      for (let r = 1; r <= numRings; r++) {
+        const ringProg = r / numRings;
+        const radX = (eventHorizonR * 1.15 + ringProg * (minDim * 0.34)) * pulse;
+        const radY = radX * 0.32;
+        const ringAlpha = (1 - ringProg * 0.65) * (0.6 + Math.sin(t * 2.5 + r * 0.5) * 0.2) * (isPlaying ? 1 : 0.4);
+
+        // Lado Esquerdo mais brilhante (Efeito Doppler Relativístico)
+        const diskGrad = ctx.createLinearGradient(cx - radX, cy, cx + radX, cy);
+        diskGrad.addColorStop(0, `rgba(56, 189, 248, ${ringAlpha * 1.2})`); // Blueshift
+        diskGrad.addColorStop(0.35, `rgba(255, 255, 255, ${ringAlpha})`);
+        diskGrad.addColorStop(0.65, `rgba(245, 158, 11, ${ringAlpha * 0.85})`);
+        diskGrad.addColorStop(1, `rgba(225, 29, 72, ${ringAlpha * 0.5})`); // Redshift
+
+        ctx.strokeStyle = diskGrad;
+        ctx.lineWidth = 3.0;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, radX, radY, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+
+      // Anel de Fótons Super Brilhante (Photon Sphere)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      ctx.arc(cx, cy, eventHorizonR * 1.08 * pulse, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(245, 158, 11, 0.6)';
+      ctx.lineWidth = 6.0;
+      ctx.stroke();
+
+      // 6. Horizonte de Eventos (Buraco Negro Puro no Centro)
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = '#000000';
+      ctx.beginPath();
+      ctx.arc(cx, cy, eventHorizonR * pulse, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Linha de contorno fina da sombra
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+      ctx.lineWidth = 1.0;
+      ctx.stroke();
+
+      ctx.restore();
+
+      requestAnimationFrame(render);
+    }
+
+    render();
+  </script>
+</body>
+</html>

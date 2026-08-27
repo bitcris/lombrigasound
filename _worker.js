@@ -23,7 +23,10 @@ export default {
       '/country': ['/country/1.html', '/country/2.html'],
       '/synthwave': ['/synthwave/1.html', '/synthwave/2.html'],
       '/flashback': ['/flashback/1.html', '/flashback/2.html', '/flashback/3.html'],
-      '/default': ['/default/1.html', '/default/2.html', '/default/3.html', '/default/4.html', '/default/5.html']
+      '/default': [
+        '/default/1.html', '/default/2.html', '/default/3.html', '/default/4.html', '/default/5.html',
+        '/default/6.html', '/default/7.html', '/default/8.html', '/default/9.html', '/default/10.html'
+      ]
     };
 
     const withIframeHeaders = (response) => {
