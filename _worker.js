@@ -19,7 +19,7 @@ export default {
     const GENRE_POOLS = {
       '/news': ['/news/1.html', '/news/2.html'],
       '/gospel': ['/gospel/1.html', '/gospel/2.html', '/gospel/3.html'],
-      '/rock': ['/rock/1.html', '/rock/2.html'],
+      '/rock': ['/rock/1.html', '/rock/2.html', '/rock/3.html'],
       '/country': ['/country/1.html', '/country/2.html'],
       '/synthwave': ['/synthwave/1.html', '/synthwave/2.html'],
       '/flashback': ['/flashback/1.html', '/flashback/2.html', '/flashback/3.html'],
